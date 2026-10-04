@@ -1,0 +1,2515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hitting 2.0">
+<meta name="application-name" content="Hitting 2.0">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Hitting 2.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-1: #0b0d10;
+    --navy-2: #171b20;
+    --navy-3: #222830;
+    --cyan: #1aa9d6;
+    --cyan-deep: #0a7fa6;
+    --white: #ffffff;
+    --ink: #e8ecef;
+    --muted: #8e98a3;
+    --bronze: #cd7f32;
+    --silver: #c4c9d4;
+    --gold: #ffd84a;
+    --diamond: #1aa9d6;
+    --red: #ff4757;
+    --green: #00d68f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { overflow-x: hidden; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(145deg, #0b0d10 0%, #171b20 40%, #0b0d10 100%) fixed;
+    color: var(--ink);
+    line-height: 1.45;
+    min-height: 100vh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(80px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(circle at 80% 10%, rgba(26,169,214,0.18) 0%, transparent 50%),
+      radial-gradient(circle at 20% 90%, rgba(26,169,214,0.10) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--cyan-deep), var(--cyan), var(--cyan-deep));
+    z-index: 99;
+    box-shadow: 0 0 16px var(--cyan);
+  }
+
+  .view { display: none; position: relative; z-index: 1; }
+  .view.active { display: block; }
+
+  header.app-header {
+    padding: 18px 16px 12px;
+    text-align: center;
+    border-bottom: 1px solid rgba(26,169,214,0.18);
+  }
+  .logo-wrap { display: flex; justify-content: center; margin-bottom: 6px; }
+  .logo { width: 76px; filter: drop-shadow(0 0 10px rgba(26,169,214,0.4)); }
+  header.app-header h1 {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 24px;
+    letter-spacing: 3px;
+    color: var(--white);
+    line-height: 1;
+  }
+  header.app-header h1 .accent { color: var(--cyan); }
+  header.app-header .tagline {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+  header.app-header .tagline .hash { color: var(--white); }
+
+  .player-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 6px 14px;
+    background: rgba(26,169,214,0.12);
+    border: 1px solid var(--cyan);
+    border-radius: 999px;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: var(--cyan);
+    font-weight: 700;
+  }
+  .player-chip .num {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 15px;
+    color: var(--white);
+    line-height: 1;
+  }
+
+  /* Player select grid */
+  .ps-roster {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    padding: 18px 14px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .ps-card {
+    background: linear-gradient(160deg, rgba(21,25,30,0.85), rgba(11,13,16,0.85));
+    border: 1px solid rgba(26,169,214,0.3);
+    border-radius: 12px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.15s;
+  }
+  .ps-card:active { transform: scale(0.98); }
+  .ps-card:hover { border-color: var(--cyan); }
+  .ps-card .ps-num {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 30px;
+    color: var(--cyan);
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .ps-card .ps-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-top: 4px;
+  }
+  .ps-card .ps-pts {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  /* Scorebar */
+  .scorebar {
+    display: flex;
+    gap: 10px;
+    max-width: 600px;
+    margin: 14px auto 0;
+    padding: 0 14px;
+  }
+  .score-card {
+    flex: 1;
+    background: linear-gradient(160deg, rgba(21,25,30,0.85), rgba(11,13,16,0.85));
+    border: 1px solid rgba(26,169,214,0.25);
+    border-radius: 6px;
+    padding: 10px 12px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .score-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  }
+  .score-card .label {
+    display: block;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .score-card .val {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 28px;
+    color: var(--white);
+    line-height: 1;
+  }
+  .score-card.total .val { color: var(--gold); }
+  .score-card.negative .val { color: var(--red); }
+  .score-card .pts { font-size: 10px; color: var(--muted); margin-left: 3px; letter-spacing: 1px; }
+
+  main { max-width: 600px; margin: 0 auto; padding: 14px 14px 20px; position: relative; z-index: 1; }
+
+  /* Tabs */
+  .tabs-wrap { margin-bottom: 12px; }
+  .tabs-label {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    padding-left: 4px;
+  }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 0 0 auto;
+    padding: 9px 14px;
+    background: rgba(21,25,30,0.6);
+    border: 1px solid rgba(26,169,214,0.25);
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    white-space: nowrap;
+    clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  }
+  .tab.active {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-deep));
+    color: var(--navy-1);
+    border-color: var(--cyan);
+  }
+  .tab.divider {
+    pointer-events: none;
+    border: 0;
+    background: transparent;
+    color: rgba(26,169,214,0.3);
+    padding: 9px 0;
+    clip-path: none;
+  }
+  .tab-group-label {
+    flex: 0 0 auto;
+    align-self: center;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    padding: 0 4px 0 2px;
+    opacity: 0.7;
+    white-space: nowrap;
+  }
+
+  /* Wheel / Mako spinner */
+  .wheel-wrap {
+    position: relative;
+    width: min(80vw, 360px);
+    aspect-ratio: 1 / 1;
+    margin: 8px auto 0;
+    user-select: none;
+  }
+  .logo-spinner {
+    position: absolute; inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .makos-logo {
+    width: 62%;
+    max-width: 240px;
+    height: auto;
+    object-fit: contain;
+    filter:
+      drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55))
+      drop-shadow(0 0 28px rgba(26,169,214,0.55));
+    animation: idleSwim 2.8s ease-in-out infinite;
+    transform-origin: center center;
+    display: block;
+  }
+  .makos-logo.spinning {
+    animation: spinMako 3.5s cubic-bezier(0.17, 0.67, 0.21, 1) forwards;
+  }
+  @keyframes idleSwim {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25%      { transform: translateY(-5px) rotate(-2deg); }
+    75%      { transform: translateY(-5px) rotate(2deg); }
+  }
+  @keyframes spinMako {
+    0%   { transform: rotate(0deg) scale(1); }
+    15%  { transform: rotate(180deg) scale(1.08); }
+    100% { transform: rotate(2520deg) scale(1); }
+  }
+  .splash-burst {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 3px solid rgba(26,169,214,0.9);
+    box-shadow: 0 0 30px rgba(26,169,214,0.7), inset 0 0 20px rgba(255, 255, 255, 0.4);
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .splash-burst.active { animation: splashBurst 1.4s ease-out; }
+  @keyframes splashBurst {
+    0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 1; border-width: 3px; }
+    100% { transform: translate(-50%, -50%) scale(4); opacity: 0; border-width: 0.4px; }
+  }
+
+  /* Buttons */
+  .spin-btn, .takeaway-btn {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin: 14px auto 4px;
+    padding: 16px 20px;
+    border: 0;
+    border-radius: 4px;
+    font-family: 'Oswald', Impact, sans-serif;
+    letter-spacing: 3px;
+    cursor: pointer;
+  }
+  .spin-btn {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-deep));
+    color: var(--navy-1);
+    font-size: 20px;
+    box-shadow: 0 6px 20px rgba(26,169,214,0.4), inset 0 -3px 0 rgba(0,0,0,0.15);
+  }
+  .spin-btn:active { transform: translateY(2px); }
+  .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .takeaway-btn {
+    background: rgba(255, 71, 87, 0.12);
+    color: #ff6b78;
+    border: 1px solid var(--red);
+    font-size: 16px;
+    margin-top: 8px;
+  }
+  .takeaway-btn:active { background: rgba(255, 71, 87, 0.25); transform: translateY(1px); }
+
+  /* Result card */
+  .result {
+    position: relative;
+    margin: 18px auto 0;
+    background: linear-gradient(160deg, rgba(21,25,30,0.9), rgba(11,13,16,0.95));
+    border: 2px solid rgba(26,169,214,0.3);
+    border-radius: 8px;
+    padding: 18px 16px;
+    min-height: 110px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .result.empty {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .result.bronze  { border-color: var(--bronze); box-shadow: 0 0 28px rgba(205,127,50,0.3); }
+  .result.silver  { border-color: var(--silver); box-shadow: 0 0 28px rgba(196,201,212,0.25); }
+  .result.gold    { border-color: var(--gold);   box-shadow: 0 0 28px rgba(255,216,74,0.35); }
+  .result.diamond { border-color: var(--diamond);box-shadow: 0 0 36px rgba(26,169,214,0.55); }
+  .result .tier-pill {
+    display: inline-block;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 13px;
+    letter-spacing: 3px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    background: var(--navy-1);
+    margin-bottom: 8px;
+  }
+  .result .tier-pill.bronze  { color: var(--bronze); border: 1px solid var(--bronze); }
+  .result .tier-pill.silver  { color: var(--silver); border: 1px solid var(--silver); }
+  .result .tier-pill.gold    { color: var(--gold);   border: 1px solid var(--gold); }
+  .result .tier-pill.diamond { color: var(--diamond);border: 1px solid var(--diamond); }
+  .result h2 {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--white);
+    line-height: 1.05;
+    margin-bottom: 8px;
+  }
+  .result .goal { font-size: 13px; color: var(--ink); margin-bottom: 12px; font-weight: 500; }
+  .result .reward {
+    display: inline-block;
+    padding: 5px 12px;
+    background: rgba(255, 216, 74, 0.1);
+    border: 1px solid rgba(255, 216, 74, 0.4);
+    border-radius: 2px;
+    color: var(--gold);
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+  .team-badge {
+    display: inline-block;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: #0b0d10;
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-deep));
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+  }
+  .complete-row { display: flex; gap: 8px; margin-top: 14px; }
+  .complete-row button {
+    flex: 1;
+    padding: 12px;
+    border: 0;
+    border-radius: 4px;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 15px;
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
+  .btn-done {
+    background: linear-gradient(135deg, var(--green), #00a86b);
+    color: var(--navy-1);
+  }
+  .btn-miss {
+    background: linear-gradient(135deg, #ff4757, #c0392b);
+    color: #fff;
+  }
+  .btn-done.completed { background: var(--navy-2); color: var(--green); }
+  .btn-miss.missed { background: var(--navy-2); color: var(--red); }
+  .btn-done:disabled, .btn-miss:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-na {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 9px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid rgba(126, 146, 179, 0.3);
+    border-radius: 4px;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
+  .btn-na:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* === Cage Sequence — Deal a Round === */
+  .deal-btn {
+    background: linear-gradient(135deg, var(--gold), #d4a017);
+    color: var(--navy-1);
+    font-size: 18px;
+    box-shadow: 0 6px 20px rgba(255, 216, 74, 0.35), inset 0 -3px 0 rgba(0,0,0,0.15);
+    display: none;
+    margin-top: 8px;
+  }
+  .deal-btn:active { transform: translateY(2px); }
+  .deal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .sequence-area { margin: 18px auto 0; }
+  .sequence-area.empty { display: none; }
+  .seq-header {
+    text-align: center;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+  .seq-card {
+    position: relative;
+    margin: 10px 0;
+    background: linear-gradient(160deg, rgba(21,25,30,0.9), rgba(11,13,16,0.95));
+    border: 2px solid rgba(26,169,214,0.3);
+    border-radius: 8px;
+    padding: 14px 14px 12px 44px;
+    text-align: left;
+    transition: opacity 0.2s;
+  }
+  .seq-card.bronze  { border-color: var(--bronze); }
+  .seq-card.silver  { border-color: var(--silver); }
+  .seq-card.gold    { border-color: var(--gold); }
+  .seq-card.diamond { border-color: var(--diamond); box-shadow: 0 0 24px rgba(26,169,214,0.4); }
+  .seq-num {
+    position: absolute;
+    top: 12px; left: 12px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--navy-1);
+    color: var(--cyan);
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(26,169,214,0.4);
+  }
+  .seq-pill {
+    display: inline-block;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 3px 9px;
+    border-radius: 2px;
+    background: var(--navy-1);
+    margin-bottom: 6px;
+  }
+  .seq-pill.bronze  { color: var(--bronze); border: 1px solid var(--bronze); }
+  .seq-pill.silver  { color: var(--silver); border: 1px solid var(--silver); }
+  .seq-pill.gold    { color: var(--gold);   border: 1px solid var(--gold); }
+  .seq-pill.diamond { color: var(--diamond);border: 1px solid var(--diamond); }
+  .seq-name {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    color: var(--white);
+    line-height: 1.05;
+    margin-bottom: 6px;
+  }
+  .seq-goal { font-size: 12.5px; color: var(--ink); margin-bottom: 8px; font-weight: 500; line-height: 1.4; }
+  .seq-reward {
+    display: inline-block;
+    padding: 3px 9px;
+    background: rgba(255, 216, 74, 0.1);
+    border: 1px solid rgba(255, 216, 74, 0.4);
+    border-radius: 2px;
+    color: var(--gold);
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+  .seq-actions { display: flex; gap: 6px; margin-top: 10px; }
+  .seq-actions button {
+    flex: 1;
+    padding: 9px;
+    border: 0;
+    border-radius: 4px;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
+  .seq-done { background: linear-gradient(135deg, var(--green), #00a86b); color: var(--navy-1); }
+  .seq-miss { background: linear-gradient(135deg, #ff4757, #c0392b); color: #fff; }
+  .seq-na {
+    display: block;
+    width: 100%;
+    margin-top: 6px;
+    padding: 7px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid rgba(126, 146, 179, 0.3);
+    border-radius: 4px;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
+  .seq-actions button:disabled, .seq-na:disabled { opacity: 0.5; cursor: not-allowed; }
+  .seq-card.done    { opacity: 0.75; }
+  .seq-card.done .seq-name::after  { content: ' ✓'; color: var(--green); }
+  .seq-card.miss    { opacity: 0.6; }
+  .seq-card.miss .seq-name::after  { content: ' ✗'; color: var(--red); }
+  .seq-card.na      { opacity: 0.45; }
+  .seq-card.na .seq-name::after    { content: ' —'; color: var(--muted); }
+  .seq-redeal {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin: 16px auto 4px;
+    padding: 13px 20px;
+    border: 1px solid var(--gold);
+    background: rgba(255, 216, 74, 0.08);
+    color: var(--gold);
+    border-radius: 4px;
+    font-family: 'Oswald', Impact, sans-serif;
+    letter-spacing: 3px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .seq-redeal:active { background: rgba(255, 216, 74, 0.15); }
+
+  .pop-points {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 48px;
+    color: var(--green);
+    text-shadow: 0 0 24px rgba(0, 214, 143, 0.9);
+    pointer-events: none;
+    animation: popFloat 1.5s ease-out forwards;
+    letter-spacing: 2px;
+    z-index: 99;
+  }
+  .pop-points.negative {
+    color: var(--red);
+    text-shadow: 0 0 24px rgba(255, 71, 87, 0.85);
+  }
+  @keyframes popFloat {
+    0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.5); }
+    20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.3); }
+    100% { opacity: 0; transform: translate(-50%, -130%) scale(1); }
+  }
+
+  /* Details panels */
+  details {
+    margin: 18px 0 0;
+    background: linear-gradient(160deg, rgba(21,25,30,0.7), rgba(11,13,16,0.7));
+    border: 1px solid rgba(26,169,214,0.2);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  details summary {
+    padding: 12px 16px;
+    cursor: pointer;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 15px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    list-style: none;
+    text-transform: uppercase;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: " ▾"; }
+  details[open] summary::after { content: " ▴"; }
+  details .body { padding: 0 16px 14px; font-size: 13px; color: var(--ink); }
+
+  /* Ladder */
+  .ladder-section h3 {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 15px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    margin: 14px 0 8px;
+    text-transform: uppercase;
+  }
+  .ladder-section h3:first-child { margin-top: 4px; }
+  .ladder-row {
+    background: rgba(21,25,30,0.5);
+    border: 1px solid rgba(26,169,214,0.15);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .ladder-row.reached {
+    background: rgba(0, 214, 143, 0.10);
+    border-color: rgba(0, 214, 143, 0.4);
+  }
+  .ladder-row.in-progress { border-color: rgba(26,169,214,0.5); }
+  .ladder-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .ladder-name {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+  }
+  .ladder-name.bronze  { color: var(--bronze); }
+  .ladder-name.silver  { color: var(--silver); }
+  .ladder-name.gold    { color: var(--gold); }
+  .ladder-name.diamond { color: #7fd6f2; }
+  .ladder-pts {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+  }
+  .ladder-row.reached .ladder-pts { display: none; }
+  .ladder-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 6px 0;
+  }
+  .ladder-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan-deep), var(--cyan));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+  .ladder-row.reached .ladder-fill {
+    background: linear-gradient(90deg, #00a86b, var(--green));
+  }
+  .ladder-desc { font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
+  .ladder-row.reached::after {
+    content: '✓ EARNED';
+    position: absolute;
+    top: 10px; right: 12px;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--green);
+  }
+
+  /* Log */
+  .log { margin-top: 8px; max-height: 240px; overflow-y: auto; }
+  .log-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(26,169,214,0.12);
+  }
+  .log-row:last-child { border-bottom: 0; }
+  .log-row .lname { color: var(--white); font-weight: 700; font-size: 13px; }
+  .log-row .ldate {
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .log-row .lpts {
+    font-family: 'Oswald', Impact, sans-serif;
+    color: var(--gold);
+    font-size: 18px;
+  }
+  .log-row.deduction .lname { color: #ff8a9a; }
+  .log-row.deduction .lpts  { color: var(--red); }
+  .log-empty {
+    color: var(--muted);
+    font-size: 12px;
+    padding: 12px 0;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  /* Leaderboard */
+  .lb-header {
+    padding: 16px 16px 8px;
+    text-align: center;
+  }
+  .lb-header h2 {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 26px;
+    letter-spacing: 3px;
+    color: var(--white);
+  }
+  .lb-header .sub {
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .lb-toggle {
+    display: flex;
+    gap: 8px;
+    max-width: 600px;
+    margin: 12px auto;
+    padding: 0 14px;
+  }
+  .lb-toggle button {
+    flex: 1;
+    padding: 10px;
+    background: rgba(21,25,30,0.6);
+    border: 1px solid rgba(26,169,214,0.25);
+    color: var(--muted);
+    border-radius: 6px;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    cursor: pointer;
+  }
+  .lb-toggle button.active {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-deep));
+    color: var(--navy-1);
+    border-color: var(--cyan);
+  }
+  .lb-list {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 14px;
+  }
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+    background: linear-gradient(160deg, rgba(21,25,30,0.85), rgba(11,13,16,0.85));
+    border: 1px solid rgba(26,169,214,0.2);
+    border-radius: 10px;
+  }
+  .lb-row.me {
+    border-color: var(--cyan);
+    box-shadow: 0 0 16px rgba(26,169,214,0.3);
+  }
+  .lb-rank {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 22px;
+    color: var(--muted);
+    min-width: 28px;
+    text-align: center;
+  }
+  .lb-row.rank-1 .lb-rank { color: var(--gold); font-size: 26px; }
+  .lb-row.rank-2 .lb-rank { color: var(--silver); }
+  .lb-row.rank-3 .lb-rank { color: var(--bronze); }
+  .lb-num {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 14px;
+    color: var(--cyan);
+    background: rgba(26,169,214,0.1);
+    border: 1px solid rgba(26,169,214,0.3);
+    border-radius: 4px;
+    padding: 2px 8px;
+    min-width: 36px;
+    text-align: center;
+  }
+  .lb-name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .lb-pts {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 22px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .lb-row.me .lb-pts { color: var(--cyan); }
+
+  /* Rewards view */
+  .reward-summary {
+    max-width: 600px;
+    margin: 14px auto;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, rgba(26,169,214,0.12), rgba(0, 119, 204, 0.06));
+    border: 1px solid rgba(26,169,214,0.4);
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(26,169,214,0.15);
+  }
+  .reward-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 0;
+  }
+  .reward-summary-row + .reward-summary-row { border-top: 1px dashed rgba(26,169,214,0.2); }
+  .rs-label {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    text-transform: uppercase;
+  }
+  .rs-value {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 15px;
+    color: var(--white);
+    letter-spacing: 1px;
+  }
+  .rs-value b { color: var(--gold); }
+  .rewards-section {
+    max-width: 600px;
+    margin: 22px auto;
+    padding: 0 14px;
+  }
+  .rewards-section h3 {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 16px;
+    letter-spacing: 4px;
+    color: var(--cyan);
+    margin: 10px 0 12px;
+    text-transform: uppercase;
+    padding-left: 4px;
+    border-left: 3px solid var(--cyan);
+  }
+  .reward-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .reward-card {
+    background: linear-gradient(160deg, rgba(21,25,30,0.85), rgba(11,13,16,0.85));
+    border: 2px solid rgba(26,169,214,0.2);
+    border-radius: 14px;
+    padding: 16px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .reward-card.tier-bronze  { border-color: var(--bronze); }
+  .reward-card.tier-silver  { border-color: var(--silver); }
+  .reward-card.tier-gold    { border-color: var(--gold); box-shadow: 0 0 20px rgba(255,216,74,0.15); }
+  .reward-card.tier-diamond { border-color: var(--diamond); box-shadow: 0 0 26px rgba(26,169,214,0.2); }
+  .reward-card.reached {
+    background: linear-gradient(160deg, rgba(0, 214, 143, 0.12), rgba(0, 168, 107, 0.06));
+    border-color: rgba(0, 214, 143, 0.5);
+  }
+  .rc-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .rc-name {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    line-height: 1;
+  }
+  .rc-name.tier-bronze  { color: var(--bronze); }
+  .rc-name.tier-silver  { color: var(--silver); }
+  .rc-name.tier-gold    { color: var(--gold); }
+  .rc-name.tier-diamond { color: #7fd6f2; }
+  .rc-pts {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+  }
+  .rc-reward {
+    color: var(--ink);
+    font-size: 13px;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .rc-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .rc-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan-deep), var(--cyan));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  .reward-card.reached .rc-fill {
+    background: linear-gradient(90deg, #00a86b, var(--green));
+  }
+  .rc-status {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .rc-status .away { color: var(--cyan); }
+  .reward-card.reached .rc-status { color: var(--green); }
+  .reward-card.reached::after {
+    content: '✓ EARNED';
+    position: absolute;
+    top: 14px; right: 16px;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--green);
+  }
+
+  /* Coach view */
+  .coach-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    max-width: 600px;
+    margin: 12px auto;
+    padding: 0 14px;
+  }
+  .coach-stat {
+    background: linear-gradient(160deg, rgba(21,25,30,0.85), rgba(11,13,16,0.85));
+    border: 1px solid rgba(26,169,214,0.25);
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .coach-stat::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  }
+  .coach-stat.wide { grid-column: 1 / -1; }
+  .coach-stat .cs-label {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .coach-stat .cs-val {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 28px;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .coach-stat .cs-top {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 18px;
+    color: var(--white);
+    letter-spacing: 1px;
+  }
+  .coach-section {
+    max-width: 600px;
+    margin: 18px auto;
+    padding: 0 14px;
+  }
+  .coach-section h3 {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    margin: 12px 0 10px;
+    text-transform: uppercase;
+  }
+  .coach-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .coach-section-head h3 { margin: 0; }
+  .coach-toggle { display: flex; gap: 4px; }
+  .coach-toggle button {
+    padding: 6px 12px;
+    background: rgba(21,25,30,0.6);
+    border: 1px solid rgba(26,169,214,0.25);
+    color: var(--muted);
+    border-radius: 6px;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+  }
+  .coach-toggle button.active {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-deep));
+    color: var(--navy-1);
+    border-color: var(--cyan);
+  }
+  .coach-player {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    margin-bottom: 5px;
+    background: linear-gradient(160deg, rgba(21,25,30,0.75), rgba(11,13,16,0.75));
+    border: 1px solid rgba(26,169,214,0.15);
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .coach-player .cp-num {
+    font-family: 'Oswald', Impact, sans-serif;
+    color: var(--cyan);
+    font-size: 14px;
+    min-width: 30px;
+    text-align: center;
+    background: rgba(26,169,214,0.1);
+    border-radius: 4px;
+    padding: 2px 4px;
+  }
+  .coach-player .cp-name {
+    flex: 1;
+    color: var(--white);
+    font-weight: 700;
+  }
+  .coach-player .cp-pts {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 20px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .coach-player.zero .cp-pts { color: var(--muted); }
+  .coach-player.negative .cp-pts { color: var(--red); }
+  .coach-feed-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(26,169,214,0.1);
+    font-size: 12px;
+  }
+  .coach-feed-row:last-child { border-bottom: 0; }
+  .coach-feed-row.deduction { background: rgba(255, 71, 87, 0.05); }
+  .coach-feed-row .cf-player {
+    color: var(--white);
+    font-weight: 700;
+    min-width: 80px;
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+  .coach-feed-row .cf-name {
+    color: var(--ink);
+    flex: 1;
+    font-size: 12px;
+  }
+  .coach-feed-row .cf-pts {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 16px;
+    color: var(--gold);
+  }
+  .coach-feed-row.deduction .cf-pts { color: var(--red); }
+  .coach-feed-row .cf-time {
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-left: 8px;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 4px;
+    left: 0; right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    padding: 8px env(safe-area-inset-right) calc(8px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+    background: linear-gradient(180deg, transparent, rgba(11,13,16,0.95) 30%);
+    backdrop-filter: blur(8px);
+  }
+  .bottom-nav-inner {
+    display: flex;
+    gap: 6px;
+    background: rgba(21,25,30,0.9);
+    border: 1px solid rgba(26,169,214,0.3);
+    border-radius: 999px;
+    padding: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  .bottom-nav button {
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    padding: 10px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+  .bottom-nav button.active {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-deep));
+    color: var(--navy-1);
+  }
+
+  /* Take-Away Sheet */
+  .takeaway-sheet {
+    position: fixed; inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .takeaway-sheet.open { display: flex; }
+  .sheet-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+  }
+  .sheet-content {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    background: linear-gradient(180deg, #12151a, #0b0d10);
+    border-top: 2px solid rgba(255, 71, 87, 0.5);
+    border-radius: 18px 18px 0 0;
+    padding: 18px 16px 28px;
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+  .sheet-handle {
+    width: 40px; height: 4px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    margin: 0 auto 14px;
+  }
+  .sheet-title {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 24px;
+    letter-spacing: 4px;
+    text-align: center;
+    color: #ff6b78;
+  }
+  .sheet-sub {
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .ta-group { margin-bottom: 12px; }
+  .ta-tier-header {
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 13px;
+    letter-spacing: 2.5px;
+    padding: 6px 0;
+    margin: 8px 0 6px;
+    border-bottom: 1px solid rgba(255, 71, 87, 0.2);
+  }
+  .ta-group.minor    .ta-tier-header { color: #ffae73; }
+  .ta-group.moderate .ta-tier-header { color: #ff8a9a; }
+  .ta-group.major    .ta-tier-header { color: var(--red); }
+  .ta-reason {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 11px 14px;
+    margin: 5px 0;
+    background: rgba(255, 71, 87, 0.08);
+    border: 1px solid rgba(255, 71, 87, 0.25);
+    color: var(--ink);
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .ta-reason:active { background: rgba(255, 71, 87, 0.3); }
+  .ta-reason .pts {
+    float: right;
+    color: #ff6b78;
+    font-family: 'Oswald', Impact, sans-serif;
+    letter-spacing: 1px;
+  }
+  .sheet-close {
+    display: block;
+    width: 100%;
+    margin-top: 14px;
+    padding: 14px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid #2f3640;
+    border-radius: 8px;
+    font-family: 'Oswald', Impact, sans-serif;
+    font-size: 15px;
+    letter-spacing: 3px;
+    cursor: pointer;
+  }
+
+  /* Status / sync indicator */
+  .sync-status {
+    position: fixed;
+    top: env(safe-area-inset-top); right: 10px;
+    z-index: 60;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    padding: 4px 8px;
+    background: rgba(11,13,16,0.7);
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .sync-status.online { color: var(--green); }
+  .sync-status.offline { color: var(--red); }
+
+  footer { text-align: center; color: var(--muted); font-size: 10px; margin-top: 22px; padding-top: 14px; border-top: 1px solid rgba(26,169,214,0.15); letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+  footer .cyan { color: var(--cyan); }
+
+  /* ===== CAGE PLANS ===== */
+  .cage-plan-btn { display:block; width:calc(100% - 28px); max-width:572px; margin:12px auto 0; padding:14px; border:0; border-radius:10px;
+    background:linear-gradient(135deg, var(--cyan), var(--cyan-deep)); color:var(--navy-1); font-family:'Oswald', Impact, sans-serif;
+    font-size:22px; letter-spacing:3px; cursor:pointer; box-shadow:0 0 18px rgba(26,169,214,.35); }
+  .cage-plan-btn small { display:block; font-family:Inter, Arial, sans-serif; font-size:10px; letter-spacing:1.5px; font-weight:700; opacity:.75; }
+  #view-cage { padding-bottom:110px; }
+  .cg-wrap { max-width:600px; margin:0 auto; padding:0 14px; }
+  .cg-chips { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:10px; }
+  .cg-chip { font-family:'Oswald', Impact, sans-serif; letter-spacing:1.5px; font-size:13px; padding:4px 10px; border-radius:20px;
+    border:1px solid rgba(26,169,214,.45); color:var(--cyan); background:rgba(26,169,214,.08); }
+  .cg-note { margin:14px 0 0; padding:12px 14px; border-left:3px solid var(--gold); background:rgba(255,216,74,.08); border-radius:6px; font-size:13px; color:var(--ink); }
+  .cg-note b { color:var(--gold); font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; font-weight:400; display:block; font-size:13px; }
+  .cg-progress { height:8px; background:rgba(255,255,255,.08); border-radius:8px; margin:16px 0 4px; overflow:hidden; }
+  .cg-progress > div { height:100%; width:0; background:linear-gradient(90deg, var(--cyan-deep), var(--cyan)); transition:width .3s; }
+  .cg-progress-label { font-size:11px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; text-align:right; }
+  .cg-block { margin:14px 0; padding:14px; border-radius:12px; background:linear-gradient(160deg, rgba(21,25,30,.85), rgba(11,13,16,.85));
+    border:1px solid rgba(26,169,214,.18); }
+  .cg-block.done { border-color:var(--green); opacity:.72; }
+  .cg-block-top { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .cg-step-no { font-family:'Oswald', Impact, sans-serif; color:var(--muted); letter-spacing:2px; font-size:12px; }
+  .cg-title { font-family:'Oswald', Impact, sans-serif; font-size:24px; letter-spacing:1.5px; color:var(--white); line-height:1.1; }
+  .cg-focus { font-size:11px; letter-spacing:1.5px; color:var(--cyan); text-transform:uppercase; font-weight:700; }
+  .cg-meta { display:flex; flex-wrap:wrap; gap:6px; margin:8px 0; }
+  .cg-meta span { font-size:11px; padding:3px 8px; border-radius:4px; background:rgba(255,255,255,.07); color:var(--ink); }
+  .cg-meta span.tosser { background:rgba(255,216,74,.15); color:var(--gold); }
+  .cg-block ol { margin:8px 0 8px 20px; font-size:14px; line-height:1.5; color:var(--ink); }
+  .cg-block li { margin:4px 0; }
+  .cg-row { font-size:13px; margin:6px 0; color:var(--ink); }
+  .cg-row b { color:var(--cyan); }
+  .cg-cue { margin:10px 0; padding:10px 12px; border-radius:8px; background:var(--navy-1); border:1px solid rgba(26,169,214,.35);
+    font-weight:800; color:var(--white); font-size:15px; }
+  .cg-cue small { display:block; font-size:10px; letter-spacing:2px; color:var(--cyan); font-weight:700; }
+  .cg-actions { display:flex; gap:8px; margin-top:10px; align-items:center; }
+  .cg-timer { flex:1; font-family:'Oswald', Impact, sans-serif; font-size:30px; letter-spacing:2px; color:var(--white); }
+  .cg-timer.up { color:var(--gold); }
+  .cg-btn { border:0; border-radius:8px; padding:10px 14px; font-family:'Oswald', Impact, sans-serif; font-size:16px; letter-spacing:2px; cursor:pointer; }
+  .cg-btn.start { background:rgba(26,169,214,.15); color:var(--cyan); border:1px solid rgba(26,169,214,.5); }
+  .cg-btn.done { background:var(--green); color:var(--navy-1); }
+  .cg-btn:disabled { opacity:.5; }
+  .cg-finish { display:block; width:100%; margin:18px 0 6px; padding:16px; border:0; border-radius:10px; background:linear-gradient(135deg, var(--gold), #f5b400);
+    color:var(--navy-1); font-family:'Oswald', Impact, sans-serif; font-size:22px; letter-spacing:3px; cursor:pointer; }
+  .cg-finish:disabled { background:rgba(255,255,255,.08); color:var(--muted); cursor:default; }
+  .cg-empty { text-align:center; padding:40px 10px; color:var(--muted); font-size:14px; line-height:1.6; }
+  .cg-empty b { color:var(--white); font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; font-size:22px; font-weight:400; display:block; }
+  .cg-back { background:transparent; border:1px solid #2f3640; color:var(--muted); border-radius:6px; padding:6px 12px; font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; cursor:pointer; margin-top:10px; }
+  .cg-video { display:flex; align-items:center; gap:8px; margin:10px 0 4px; padding:10px 12px; border-radius:8px; background:rgba(255,71,87,.12); border:1px solid rgba(255,71,87,.45); color:#fff; text-decoration:none; font-weight:700; font-size:13px; }
+  .cg-video b { font-family:'Oswald', Impact, sans-serif; font-weight:400; letter-spacing:2px; font-size:16px; color:#ff6b78; }
+  .cg-video.pending { background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.15); color:var(--muted); font-weight:500; }
+  .cg-detail { margin:6px 0 2px; font-size:13px; color:var(--gold); font-weight:700; }
+  .cg-detail span { font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; font-weight:400; margin-right:6px; }
+  .cp-opt .ser { display:inline-block; font-size:8px; letter-spacing:1px; padding:1px 5px; border-radius:3px; background:var(--gold); color:var(--navy-1); margin-left:4px; vertical-align:middle; }
+  .cp-est { text-align:center; font-size:12px; letter-spacing:1px; margin:-4px 0 10px; color:var(--cyan); font-weight:700; }
+  .cp-est.over { color:#ff8a9a; }
+  .lib-btn { display:block; width:calc(100% - 28px); max-width:572px; margin:14px auto 0; padding:12px; border-radius:10px; border:1px solid rgba(26,169,214,.5);
+    background:rgba(26,169,214,.1); color:var(--cyan); font-family:'Oswald', Impact, sans-serif; font-size:18px; letter-spacing:3px; cursor:pointer; }
+  #view-library { padding-bottom:110px; }
+  .lib-focus { margin:14px 0; padding:14px; border-radius:12px; background:linear-gradient(160deg, rgba(21,25,30,.85), rgba(11,13,16,.85)); border:1px solid rgba(26,169,214,.18); }
+  .lib-focus h3 { font-family:'Oswald', Impact, sans-serif; font-size:24px; letter-spacing:1.5px; color:var(--white); font-weight:400; }
+  .lib-focus .lib-tags { margin:4px 0 6px; display:flex; gap:6px; flex-wrap:wrap; }
+  .lib-focus .lib-tags span { font-size:10px; letter-spacing:1.5px; font-weight:700; padding:2px 7px; border-radius:3px; background:rgba(26,169,214,.12); color:var(--cyan); }
+  .lib-focus .lib-tags span.ser { background:var(--gold); color:var(--navy-1); }
+  .lib-focus > p { font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:6px; }
+  .lib-focus details { border-top:1px solid rgba(255,255,255,.08); padding:10px 0 4px; }
+  .lib-focus summary { cursor:pointer; list-style:none; display:flex; justify-content:space-between; gap:10px; font-weight:700; color:var(--white); font-size:15px; }
+  .lib-focus summary::-webkit-details-marker { display:none; }
+  .lib-focus summary small { color:var(--muted); font-weight:500; font-size:11px; white-space:nowrap; }
+  .lib-focus ol { margin:8px 0 8px 20px; font-size:14px; line-height:1.5; color:var(--ink); }
+  .cg-intro { margin:14px 0 0; padding:12px 14px; border-radius:10px; background:rgba(255,71,87,.08); border:1px solid rgba(255,71,87,.35); }
+  .cg-intro b { display:block; font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; font-weight:400; color:#ff6b78; font-size:15px; }
+  .cg-intro p { font-size:13px; color:var(--ink); margin:4px 0 8px; line-height:1.5; }
+  .cg-intro .cg-video { margin:0; }
+  /* coach: cage plan rows + assign sheet */
+  .cp-plan-row { cursor:pointer; flex-wrap:wrap; }
+  .cp-plan-row .cp-focus { width:100%; display:flex; flex-wrap:wrap; gap:4px; padding-left:40px; margin-top:4px; }
+  .cp-plan-row .cp-focus span { font-size:10px; letter-spacing:1px; padding:2px 7px; border-radius:10px; background:rgba(26,169,214,.12); color:var(--cyan); font-weight:700; text-transform:uppercase; }
+  .cp-plan-row .cp-focus span.none { background:rgba(255,71,87,.12); color:#ff8a9a; }
+  .cp-plan-row .cp-last { font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+  .cp-sheet .sheet-content { border-top-color:rgba(26,169,214,.6); }
+  .cp-sheet .sheet-title { color:var(--cyan); }
+  .cp-opts { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 12px; }
+  .cp-opt { text-align:left; padding:10px; border-radius:8px; border:1px solid rgba(26,169,214,.25); background:rgba(21,25,30,.6); color:var(--ink); cursor:pointer; font-size:13px; font-weight:700; }
+  .cp-opt small { display:block; font-size:9px; letter-spacing:1.5px; color:var(--muted); font-weight:700; margin-top:2px; }
+  .cp-opt.on { background:linear-gradient(135deg, var(--cyan), var(--cyan-deep)); color:var(--navy-1); border-color:var(--cyan); }
+  .cp-opt.on small { color:var(--navy-2); }
+  .cp-note-in { width:100%; min-height:64px; padding:10px; border-radius:8px; border:1px solid rgba(26,169,214,.25); background:rgba(11,13,16,.8); color:var(--white); font-size:14px; font-family:inherit; }
+  .cp-sheet-actions { display:flex; gap:8px; margin-top:12px; }
+  .cp-sheet-actions button { flex:1; padding:12px; border-radius:8px; border:0; font-family:'Oswald', Impact, sans-serif; font-size:17px; letter-spacing:2px; cursor:pointer; }
+  .cp-save { background:linear-gradient(135deg, var(--cyan), var(--cyan-deep)); color:var(--navy-1); }
+  .cp-clear { background:transparent; color:#ff8a9a; border:1px solid rgba(255,71,87,.4) !important; }
+  .cp-cancel { background:rgba(255,255,255,.06); color:var(--muted); }
+  .cp-hint { font-size:11px; color:var(--muted); letter-spacing:1px; text-align:center; margin-bottom:8px; }
+
+  /* ===== FEEDBACK + VIDEO ===== */
+  .fb-card { margin:14px 0; padding:16px; border-radius:12px; background:linear-gradient(160deg, rgba(21,25,30,.9), rgba(11,13,16,.9)); border:1px solid rgba(26,169,214,.25); }
+  .fb-card h3 { font-family:'Oswald', Impact, sans-serif; font-weight:400; letter-spacing:2px; font-size:22px; color:var(--white); margin-bottom:4px; }
+  .fb-card .fb-sub { font-size:12px; color:var(--muted); margin-bottom:12px; }
+  .fb-label { font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; color:var(--cyan); font-size:14px; margin:12px 0 6px; }
+  .fb-results { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
+  .fb-res { padding:12px 6px; border-radius:8px; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.04); color:var(--ink); font-weight:800; font-size:13px; cursor:pointer; }
+  .fb-res span { display:block; font-size:20px; margin-bottom:2px; }
+  .fb-res.on[data-r="nailed"] { background:rgba(0,214,143,.18); border-color:var(--green); color:var(--green); }
+  .fb-res.on[data-r="getting"] { background:rgba(255,216,74,.15); border-color:var(--gold); color:var(--gold); }
+  .fb-res.on[data-r="struggled"] { background:rgba(255,71,87,.15); border-color:var(--red); color:#ff8a9a; }
+  .fb-toggle { display:flex; align-items:center; gap:10px; padding:12px; border-radius:8px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.12); cursor:pointer; font-weight:700; color:var(--ink); font-size:14px; }
+  .fb-toggle .box { width:22px; height:22px; border-radius:5px; border:2px solid var(--gold); display:flex; align-items:center; justify-content:center; color:var(--navy-1); font-weight:900; }
+  .fb-toggle.on { border-color:var(--gold); background:rgba(255,216,74,.1); }
+  .fb-toggle.on .box { background:var(--gold); }
+  .fb-file { display:block; width:100%; padding:14px; border-radius:8px; border:1px dashed rgba(26,169,214,.5); background:rgba(26,169,214,.06); color:var(--cyan); text-align:center; font-weight:700; font-size:14px; cursor:pointer; }
+  .fb-file input { display:none; }
+  .fb-file small { display:block; color:var(--muted); font-weight:500; font-size:11px; margin-top:4px; }
+  .fb-status { font-size:12px; margin-top:8px; color:var(--muted); text-align:center; min-height:16px; }
+  .fb-status.err { color:#ff8a9a; }
+  .fb-send { display:block; width:100%; margin-top:14px; padding:15px; border:0; border-radius:10px; background:linear-gradient(135deg, var(--cyan), var(--cyan-deep)); color:var(--navy-1); font-family:'Oswald', Impact, sans-serif; font-size:20px; letter-spacing:3px; cursor:pointer; }
+  .fb-send:disabled { opacity:.5; }
+  .fb-skip { display:block; margin:10px auto 0; background:none; border:0; color:var(--muted); font-size:12px; letter-spacing:1px; text-decoration:underline; cursor:pointer; }
+  .fb-list-item { display:flex; gap:10px; align-items:center; padding:10px 12px; margin-bottom:6px; border-radius:8px; background:rgba(21,25,30,.75); border:1px solid rgba(26,169,214,.15); cursor:pointer; }
+  .fb-list-item .fb-li-main { flex:1; min-width:0; }
+  .fb-list-item .fb-li-name { font-weight:800; color:var(--white); font-size:14px; }
+  .fb-list-item .fb-li-meta { font-size:11px; color:var(--muted); margin-top:2px; }
+  .fb-badge { font-size:10px; letter-spacing:1px; font-weight:800; padding:3px 7px; border-radius:4px; white-space:nowrap; }
+  .fb-badge.new { background:var(--red); color:#fff; }
+  .fb-badge.done { background:rgba(0,214,143,.15); color:var(--green); }
+  .fb-badge.res-nailed { background:rgba(0,214,143,.15); color:var(--green); }
+  .fb-badge.res-getting { background:rgba(255,216,74,.15); color:var(--gold); }
+  .fb-badge.res-struggled { background:rgba(255,71,87,.15); color:#ff8a9a; }
+  .fb-video { width:100%; max-height:62vh; border-radius:10px; background:#000; display:block; margin:10px 0; }
+  .fb-rec-row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .fb-rec-row button { flex:1; min-width:120px; padding:12px; border-radius:8px; border:0; font-family:'Oswald', Impact, sans-serif; font-size:17px; letter-spacing:2px; cursor:pointer; }
+  .fb-rec { background:var(--red); color:#fff; }
+  .fb-rec.live { animation:fbpulse 1s infinite; }
+  @keyframes fbpulse { 50% { opacity:.55; } }
+  .fb-ghost { background:rgba(255,255,255,.07); color:var(--ink); }
+  .fb-speed { display:flex; gap:6px; margin:6px 0 10px; }
+  .fb-speed button { padding:6px 12px; border-radius:6px; border:1px solid rgba(26,169,214,.3); background:transparent; color:var(--muted); font-weight:800; font-size:12px; cursor:pointer; }
+  .fb-speed button.on { background:var(--cyan); color:var(--navy-1); border-color:var(--cyan); }
+  .fb-quote { margin:8px 0; padding:10px 12px; border-left:3px solid var(--cyan); background:rgba(26,169,214,.07); border-radius:6px; font-size:14px; color:var(--ink); }
+  #view-review, #view-myfeedback { padding-bottom:110px; }
+
+  .cg-bench { margin:10px 0 4px; padding:10px 12px; border-radius:8px; background:rgba(255,216,74,.07); border:1px solid rgba(255,216,74,.35); }
+  .cg-bench small { display:block; font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; color:var(--gold); font-size:12px; }
+  .cg-bench .bl { font-size:13px; color:var(--ink); font-weight:700; margin:2px 0 8px; }
+  .cg-bench .bp { font-size:12px; color:var(--muted); margin-bottom:6px; }
+  .cg-step { display:flex; align-items:center; gap:10px; }
+  .cg-step button { width:40px; height:40px; border-radius:8px; border:1px solid rgba(255,216,74,.5); background:transparent; color:var(--gold); font-size:22px; font-weight:800; cursor:pointer; }
+  .cg-step .val { font-family:'Oswald', Impact, sans-serif; font-size:30px; color:var(--white); min-width:70px; text-align:center; }
+  .cg-step .val span { font-size:16px; color:var(--muted); }
+  .cg-yn { display:flex; gap:8px; }
+  .cg-yn button { flex:1; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,.2); background:transparent; color:var(--ink); font-weight:800; cursor:pointer; }
+  .cg-yn button.on.y { background:rgba(0,214,143,.18); border-color:var(--green); color:var(--green); }
+  .cg-yn button.on.n { background:rgba(255,71,87,.15); border-color:var(--red); color:#ff8a9a; }
+  .cg-bres { font-size:12px; font-weight:800; letter-spacing:1px; margin-top:6px; min-height:16px; }
+  .cg-bres.hit { color:var(--green); } .cg-bres.miss { color:#ff8a9a; }
+  .sum-big { text-align:center; margin:6px 0 12px; }
+  .sum-big .n { font-family:'Oswald', Impact, sans-serif; font-size:54px; color:var(--white); line-height:1; }
+  .sum-big .t { font-size:12px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; }
+  .sum-row { display:flex; justify-content:space-between; gap:10px; font-size:13px; padding:7px 0; border-bottom:1px solid rgba(255,255,255,.06); color:var(--ink); }
+  .sum-row b { white-space:nowrap; } .sum-row b.hit { color:var(--green); } .sum-row b.miss { color:#ff8a9a; }
+  .sum-master { margin:12px 0; padding:12px; border-radius:10px; background:linear-gradient(135deg, var(--gold), #f5b400); color:var(--navy-1); font-weight:800; text-align:center; }
+  .sum-master b { display:block; font-family:'Oswald', Impact, sans-serif; font-weight:400; letter-spacing:2px; font-size:22px; }
+  .cp-star { width:100%; padding-left:40px; margin-top:4px; font-size:11px; font-weight:800; color:var(--gold); letter-spacing:.5px; }
+
+  /* ===== LOGIN + ACCESS ===== */
+  #view-login { min-height:100vh; padding:40px 18px 40px; }
+  .lg-card { max-width:420px; margin:24px auto 0; padding:22px 18px; border-radius:14px; background:linear-gradient(160deg, rgba(21,25,30,.92), rgba(11,13,16,.92)); border:1px solid rgba(26,169,214,.3); }
+  .lg-card h2 { font-family:'Oswald', Impact, sans-serif; font-weight:400; letter-spacing:3px; font-size:26px; color:var(--white); text-align:center; }
+  .lg-card p { font-size:13px; color:var(--muted); text-align:center; margin:6px 0 14px; line-height:1.5; }
+  .lg-in { width:100%; padding:14px; border-radius:10px; border:1px solid rgba(26,169,214,.35); background:rgba(11,13,16,.9); color:var(--white); font-size:17px; font-family:inherit; text-align:center; }
+  .lg-in.code { letter-spacing:10px; font-size:26px; font-family:'Oswald', Impact, sans-serif; }
+  body.locked .bottom-nav { display:none; }
+  .fa-player { padding:10px 12px; margin-bottom:6px; border-radius:8px; background:rgba(21,25,30,.75); border:1px solid rgba(26,169,214,.15); }
+  .fa-player .fa-name { font-weight:800; color:var(--white); font-size:14px; }
+  .fa-player .fa-none { font-size:11px; color:#ff8a9a; font-weight:700; letter-spacing:1px; }
+  .fa-email { display:inline-flex; align-items:center; gap:6px; margin:4px 6px 0 0; padding:3px 4px 3px 9px; border-radius:12px; background:rgba(26,169,214,.12); color:var(--ink); font-size:12px; }
+  .fa-email button { border:0; background:rgba(255,71,87,.25); color:#fff; width:20px; height:20px; border-radius:10px; cursor:pointer; font-size:12px; line-height:20px; }
+  .fa-add { display:flex; flex-direction:column; gap:8px; margin:8px 0 14px; }
+  .fa-add select, .fa-add input { width:100%; padding:11px; border-radius:8px; border:1px solid rgba(26,169,214,.3); background:rgba(11,13,16,.9); color:var(--white); font-size:14px; font-family:inherit; }
+  .div-logo { width:28px; height:28px; object-fit:contain; vertical-align:middle; margin-left:6px; }
+  .ps-card .div-logo { width:40px; height:40px; margin:0 0 0 6px; }
+
+  /* Hitting 2.0 */
+  .h20-logo { width: 260px; max-width: 80%; height: auto; display: block; margin: 0 auto 2px; }
+  .h20-sub { font-family: 'Oswald', Impact, sans-serif; letter-spacing: 3px; font-size: 15px; color: var(--cyan); margin-top: 6px; text-transform: uppercase; }
+  header.app-header h1 { font-weight: 600; }
+  .home-wrap { max-width: 600px; margin: 0 auto; padding: 4px 14px 20px; }
+  .home-btn { display:block; width:100%; margin:12px 0 0; padding:16px 14px; border:1px solid rgba(26,169,214,.35); border-radius:12px;
+    background: linear-gradient(160deg, rgba(23,27,32,.95), rgba(11,13,16,.95)); color: var(--white); text-align:left; cursor:pointer;
+    font-family:'Oswald', Impact, sans-serif; font-size:21px; letter-spacing:1.5px; }
+  .home-btn.primary { background: var(--cyan); color: #0b0d10; border-color: var(--cyan); }
+  .home-btn small { display:block; font-family:'Inter', Arial, sans-serif; font-size:11px; letter-spacing:.6px; font-weight:600; opacity:.8; margin-top:3px; text-transform:none; }
+  .home-note { margin-top:14px; padding:12px 14px; border-left:3px solid var(--cyan); background: rgba(26,169,214,.08); border-radius:0 8px 8px 0; font-size:13px; line-height:1.5; }
+  .home-note b { display:block; font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; color:var(--cyan); font-size:12px; margin-bottom:2px; }
+  .cl-add { display:grid; grid-template-columns: 1fr; gap:8px; margin:8px 0 12px; }
+  .cl-add input { width:100%; padding:11px 12px; border-radius:8px; border:1px solid #2f3640; background:#0b0d10; color:var(--white); font-size:15px; font-family:'Inter', Arial, sans-serif; }
+  .cp-num.ini { font-family:'Oswald', Impact, sans-serif; background: rgba(26,169,214,.15); color: var(--cyan); border-radius: 50%; width: 34px; height: 34px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+  footer.h20-foot { text-align:center; color:var(--muted); font-size:10px; letter-spacing:2px; padding:22px 10px 6px; }
+</style>
+</head>
+<body class="locked">
+
+<div class="view" id="view-login">
+  <header class="app-header" style="border:0">
+    <img class="h20-logo" src="icons/logo-header.png" alt="Hitting 2.0">
+    <div class="h20-sub">Training App</div>
+  </header>
+  <div class="lg-card" id="lgCard"></div>
+</div>
+
+<div class="view" id="view-select">
+  <header class="app-header">
+    <img class="h20-logo" src="icons/logo-header.png" alt="Hitting 2.0">
+    <div class="h20-sub">Pick a hitter</div>
+  </header>
+  <div class="ps-roster" id="rosterGrid"></div>
+</div>
+
+<div class="view" id="view-main">
+  <header class="app-header">
+    <img class="h20-logo" src="icons/logo-header.png" alt="Hitting 2.0">
+    <div class="player-chip" id="playerChip"><span id="playerName">Pick a client</span><span style="opacity:.6;">⇄</span></div>
+  </header>
+  <div class="home-wrap">
+    <button class="home-btn primary" id="cagePlanBtn">⚾ MY CAGE PLAN<small id="cagePlanSub">Your session from Coach Devan</small></button>
+    <div id="homeNote"></div>
+    <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small>Up to 2 minutes. Coach talks over it.</small></button>
+    <button class="home-btn" id="homeFeedback">💬 COACH FEEDBACK<small>Voice-overs and notes on your videos</small></button>
+    <footer class="h20-foot">HITTING 2.0 · COACH DEVAN AHART</footer>
+  </div>
+</div>
+
+<div class="view" id="view-coach">
+  <div class="lb-header"><h2>COACH</h2><div class="sub">Hitting 2.0</div></div>
+  <div class="coach-section">
+    <div class="coach-section-head"><h3>Clients &amp; Plans</h3><div class="cp-last" id="cpSummary"></div></div>
+    <div class="cp-hint" style="text-align:left">Tap a client after a lesson to set what he works on this week</div>
+    <button class="lib-btn" id="openLibrary" style="width:100%;margin:6px 0 10px">📚 DRILL LIBRARY</button>
+    <div id="coachCagePlans"></div>
+  </div>
+  <div class="coach-section">
+    <div class="coach-section-head"><h3>Videos to Review</h3><div class="cp-last" id="fbSummary"></div></div>
+    <div class="cp-hint" style="text-align:left">Tap one to watch and record a voice-over</div>
+    <div id="coachFeedback"></div>
+  </div>
+  <div class="coach-section">
+    <div class="coach-section-head"><h3>Session Reports</h3><div class="cp-last" id="srSummary"></div></div>
+    <div class="cp-hint" style="text-align:left">Benchmarks hit, mastered or struggled</div>
+    <div id="coachReports"></div>
+  </div>
+  <div class="coach-section">
+    <div class="coach-section-head"><h3>Add a Client</h3></div>
+    <div class="cl-add">
+      <input id="clName" placeholder="Hitter's name" autocomplete="off">
+      <input id="clEmail" type="email" placeholder="Parent email (to sign in)" autocomplete="off">
+      <button class="lib-btn" id="clAdd" style="margin:0;width:100%">+ ADD CLIENT</button>
+      <div class="fb-status" id="clStatus"></div>
+    </div>
+  </div>
+  <div class="coach-section">
+    <div class="coach-section-head"><h3>Sign-In Access</h3><div class="cp-last" id="faSummary"></div></div>
+    <div class="cp-hint" style="text-align:left">Only these emails can sign in. Archive a client when they stop training.</div>
+    <div class="fa-add">
+      <input type="email" id="faEmail" placeholder="parent@email.com" autocomplete="off">
+      <select id="faPlayer"></select>
+      <button class="lib-btn" id="faAdd" style="margin:0;width:100%">+ ADD EMAIL</button>
+      <div class="fb-status" id="faStatus"></div>
+    </div>
+    <div id="faList"></div>
+  </div>
+  <div style="text-align:center;padding:20px">
+    <button id="lockCoach" style="background:transparent;color:var(--muted);border:1px solid #2f3640;padding:8px 16px;border-radius:4px;font-family:'Oswald',Impact,sans-serif;letter-spacing:2px;cursor:pointer;">SIGN OUT</button>
+  </div>
+</div>
+
+<div class="view" id="view-cage">
+  <div class="lb-header"><h2>MY CAGE PLAN</h2><div class="sub" id="cgPlayer">—</div><div class="cg-chips" id="cgChips"></div></div>
+  <div class="cg-wrap" id="cgBody"></div>
+</div>
+<div class="view" id="view-library">
+  <div class="lb-header"><h2>DRILL LIBRARY</h2><div class="sub">Every series and drill a client can be assigned</div></div>
+  <div class="cg-wrap" id="libBody"></div>
+</div>
+<div class="view" id="view-review">
+  <div class="lb-header"><h2>REVIEW</h2><div class="sub" id="rvPlayer">—</div></div>
+  <div class="cg-wrap" id="rvBody"></div>
+</div>
+<div class="view" id="view-myfeedback">
+  <div class="lb-header"><h2>COACH FEEDBACK</h2><div class="sub" id="mfPlayer">—</div></div>
+  <div class="cg-wrap" id="mfBody"></div>
+</div>
+
+<div class="takeaway-sheet cp-sheet" id="cpSheet">
+  <div class="sheet-backdrop" id="cpBackdrop"></div>
+  <div class="sheet-content">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">CAGE PLAN</div>
+    <div class="sheet-sub" id="cpSheetPlayer">—</div>
+    <div class="cp-hint">Pick 1 to 3 focus areas</div>
+    <div class="cp-opts" id="cpOpts"></div>
+    <div class="cp-est" id="cpEst"></div>
+    <textarea class="cp-note-in" id="cpNote" maxlength="240" placeholder="After-lesson note (optional): what we worked on, what to feel"></textarea>
+    <div class="cp-sheet-actions">
+      <button class="cp-cancel" id="cpCancel">CANCEL</button>
+      <button class="cp-clear" id="cpClear">CLEAR</button>
+      <button class="cp-save" id="cpSave">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button data-view="main" class="active">⚾ Home</button>
+    <button data-view="coach">👔 Coach</button>
+  </div>
+</nav>
+
+<script src="cage-library.js"></script>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+
+const SUPABASE_URL = 'https://buxdjqowkknqagojspqb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1eGRqcW93a2tucWFnb2pzcHFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwODY1OTEsImV4cCI6MjEwNjY2MjU5MX0.mCMkIrUt8AfBRBOgJH7f2C9Vd0Bu4BHIBIXyEboGuJ4';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Auto-update: phones cache this page, so check for a newer version on open and when the app comes back on screen.
+const APP_VERSION = '20261004093601';
+async function checkForUpdate() {
+  try {
+    const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) return;
+    const { v } = await r.json();
+    if (v && v !== APP_VERSION && sessionStorage.getItem('h20_reloaded_for') !== v) {
+      sessionStorage.setItem('h20_reloaded_for', v);
+      location.replace(location.pathname + '?v=' + v);
+    }
+  } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkForUpdate(); });
+checkForUpdate();
+
+const LOCAL_KEY = 'h20_client_v1';
+let currentPlayerId = localStorage.getItem(LOCAL_KEY) || null;   // the selected client
+let CLIENTS = [];                                                  // [{ id, name, active }]
+const initials = n => String(n || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+const clientById = id => CLIENTS.find(c => c.id === id);
+
+function showView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.toggle('active', b.dataset.view === viewId.replace('view-', '')));
+}
+
+async function fetchClients() {
+  const { data, error } = await supabase.from('clients').select('*').eq('active', true).order('name');
+  if (error) { console.warn('clients', error); return; }
+  CLIENTS = data || [];
+}
+
+// --- Client picker (parents with more than one kid, or the coach previewing) ---
+function renderPlayerSelect() {
+  const grid = document.getElementById('rosterGrid');
+  const list = visibleRoster();
+  grid.innerHTML = list.length ? list.map(p => `<div class="ps-card" data-id="${p.id}">
+      <div class="ps-num">${initials(p.name)}</div>
+      <div class="ps-name">${cgEsc(p.name)}</div>
+      <div class="ps-pts">${(cagePlans[p.id]?.focus || []).length ? 'PLAN READY' : 'NO PLAN YET'}</div>
+    </div>`).join('') : '<div class="cg-empty"><b>NO CLIENTS YET</b>Add one in the Coach tab.</div>';
+}
+function setPlayer(pid) {
+  if (!visibleRoster().some(p => p.id === pid)) return;
+  currentPlayerId = pid;
+  localStorage.setItem(LOCAL_KEY, pid);
+  renderHome();
+  showView('view-main');
+}
+function renderHome() {
+  const p = clientById(currentPlayerId);
+  document.getElementById('playerName').textContent = p ? p.name : 'Pick a client';
+  updateCagePlanButton();
+}
+function renderHomeNote() {
+  const el = document.getElementById('homeNote'); if (!el) return;
+  const note = cagePlans[currentPlayerId]?.note;
+  el.innerHTML = note ? `<div class="home-note"><b>FROM COACH DEVAN</b>${cgEsc(note)}</div>` : '';
+}
+document.getElementById('rosterGrid').addEventListener('click', e => { const c = e.target.closest('.ps-card'); if (c) setPlayer(c.dataset.id); });
+document.getElementById('playerChip').addEventListener('click', () => { renderPlayerSelect(); showView('view-select'); });
+document.getElementById('cagePlanBtn').addEventListener('click', openCageView);
+document.getElementById('homeVideo').addEventListener('click', () => {
+  if (!currentPlayerId) return;
+  showView('view-cage'); window.scrollTo(0, 0);
+  const p = clientById(currentPlayerId);
+  document.getElementById('cgPlayer').textContent = p ? p.name : '';
+  document.getElementById('cgChips').innerHTML = '';
+  renderVideoForm(document.getElementById('cgBody'), cagePlans[currentPlayerId]?.focus || []);
+});
+document.getElementById('homeFeedback').addEventListener('click', () => { if (currentPlayerId) openMyFeedback(); });
+
+async function openCoachView() {
+  showView('view-coach'); window.scrollTo(0, 0);
+  await Promise.all([fetchClients(), fetchCagePlans(), fetchCageStats(), refreshAccess()]);
+  fbRows = await fetchFeedback();
+  renderCoachCagePlans(); renderCoachFeedback(); renderAccess();
+}
+document.querySelectorAll('.bottom-nav button').forEach(b => b.addEventListener('click', () => {
+  if (b.dataset.view === 'coach') openCoachView();
+  else if (!currentPlayerId) { renderPlayerSelect(); showView('view-select'); }
+  else { renderHome(); showView('view-main'); }
+}));
+document.getElementById('lockCoach').addEventListener('click', () => signOut());
+
+// ===== CAGE PLANS =====
+let cagePlans = {};        // client_id -> { focus: [], note, updated_at }
+let cageStats = {};        // client_id -> { count, last }
+let cpEditing = null;      // player id being edited in the coach sheet
+let cpSelected = [];
+let cgState = null;        // { session, done:Set, timers:{} }
+const cgEsc = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const focusName = id => (CAGE_FOCUS.find(f => f.id === id) || {}).name || id;
+
+async function fetchCagePlans() {
+  const { data, error } = await supabase.from('plans').select('*');
+  if (error) { console.warn('plans', error); return; }
+  cagePlans = {};
+  for (const r of data || []) cagePlans[r.client_id] = r;
+}
+async function fetchCageStats() {
+  const { data, error } = await supabase.from('feedback').select('client_id, created_at').not('result', 'is', null).order('created_at', { ascending: false }).limit(2000);
+  if (error) { console.warn('cage stats', error); return; }
+  cageStats = {};
+  for (const r of data || []) {
+    const s = cageStats[r.client_id] || (cageStats[r.client_id] = { count: 0, last: r.created_at });
+    s.count++;
+  }
+}
+function daysAgo(ts) {
+  const d = Math.floor((Date.now() - new Date(ts).getTime()) / 86400000);
+  return d <= 0 ? 'today' : d === 1 ? 'yesterday' : d + ' days ago';
+}
+
+// --- Coach side ---
+function renderCoachCagePlans() {
+  const el = document.getElementById('coachCagePlans');
+  if (!el) return;
+  const assigned = CLIENTS.filter(p => (cagePlans[p.id]?.focus || []).length).length;
+  document.getElementById('cpSummary').textContent = `${assigned} / ${CLIENTS.length} assigned`;
+  el.innerHTML = CLIENTS.map(p => {
+    const focus = cagePlans[p.id]?.focus || [];
+    const st = cageStats[p.id];
+    const last = st ? `${st.count} session${st.count === 1 ? '' : 's'} · last ${daysAgo(st.last)}` : 'no sessions yet';
+    const chips = focus.length ? focus.map(f => `<span>${cgEsc(focusName(f))}</span>`).join('') : '<span class="none">No plan yet</span>';
+    return `<div class="coach-player cp-plan-row" data-pid="${p.id}">
+      <div class="cp-num ini">${initials(p.name)}</div>
+      <div class="cp-name">${cgEsc(p.name)}</div>
+      <div class="cp-last">${last}</div>
+      <div class="cp-focus">${chips}</div>
+      ${masteryBadges(p.id, focus)}
+    </div>`;
+  }).join('');
+  el.querySelectorAll('.cp-plan-row').forEach(row => row.addEventListener('click', () => openCagePlanSheet(row.dataset.pid)));
+}
+
+function masteryBadges(playerId, focus) {
+  const out = [];
+  for (const fid of focus) {
+    const f = CAGE_FOCUS.find(x => x.id === fid); if (!f || !f.series) continue;
+    const rows = fbRows.filter(r => r.client_id === playerId && r.series === fid).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    let n = 0; for (const r of rows) { if (r.mastered) n++; else break; }
+    if (n >= SERIES_MASTERY_STREAK) out.push(`⭐ ${cgEsc(f.name)} mastered ${n}x in a row. Ready to move on.`);
+  }
+  return out.length ? `<div class="cp-star">${out.join('<br>')}</div>` : '';
+}
+function renderCpOpts() {
+  document.getElementById('cpOpts').innerHTML = CAGE_FOCUS.map(f =>
+    `<button class="cp-opt ${cpSelected.includes(f.id) ? 'on' : ''}" data-fid="${f.id}">${cgEsc(f.name)}${f.series ? '<span class="ser">SERIES</span>' : ''}<small>${f.pillar}</small></button>`).join('');
+  const est = document.getElementById('cpEst');
+  if (est) {
+    const info = cpSelected.length ? cageRotationInfo(cpSelected) : { maxMinutes: 0, rotation: [] };
+    const m = info.maxMinutes;
+    const rot = info.rotation.length > 1 ? `Rotates: ${info.rotation.map(r => `${r.name} (${r.minutes} min)`).join(' → ')}` : (m ? `Session: about ${m} min` : '');
+    est.textContent = rot + (m > 47 ? ' · over a 45-min booking, drop one' : '');
+    est.classList.toggle('over', m > 47);
+  }
+  document.querySelectorAll('#cpOpts .cp-opt').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.fid;
+    if (cpSelected.includes(id)) cpSelected = cpSelected.filter(x => x !== id);
+    else if (cpSelected.length < 3) cpSelected.push(id);
+    else { alertCp('Max 3 focus areas'); return; }
+    renderCpOpts();
+  }));
+}
+function alertCp(msg) {
+  const h = document.querySelector('#cpSheet .cp-hint');
+  h.textContent = msg; h.style.color = '#ff8a9a';
+  setTimeout(() => { h.textContent = 'Pick 1 to 3 focus areas'; h.style.color = ''; }, 1600);
+}
+function openCagePlanSheet(pid) {
+  const p = CLIENTS.find(r => r.id === pid);
+  if (!p) return;
+  cpEditing = pid;
+  cpSelected = [...(cagePlans[pid]?.focus || [])];
+  document.getElementById('cpSheetPlayer').innerHTML = cgEsc(p.name);
+  document.getElementById('cpNote').value = cagePlans[pid]?.note || '';
+  renderCpOpts();
+  document.getElementById('cpSheet').classList.add('open');
+}
+function closeCagePlanSheet() { document.getElementById('cpSheet').classList.remove('open'); cpEditing = null; }
+async function saveCagePlan(clear) {
+  if (!cpEditing) return;
+  if (!clear && !cpSelected.length) { alertCp('Pick at least 1 focus area'); return; }
+  const row = { client_id: cpEditing, focus: clear ? [] : cpSelected,
+    note: clear ? null : (document.getElementById('cpNote').value.trim() || null), assigned_by: 'coach', updated_at: new Date().toISOString() };
+  const btn = document.getElementById('cpSave'); btn.disabled = true; btn.textContent = 'SAVING…';
+  const { error } = await supabase.from('plans').upsert(row, { onConflict: 'client_id' });
+  btn.disabled = false; btn.textContent = 'SAVE';
+  if (error) { alertCp('Save failed. Check connection.'); console.warn(error); return; }
+  cagePlans[row.client_id] = row;
+  closeCagePlanSheet();
+  renderCoachCagePlans();
+}
+document.getElementById('cpSave').addEventListener('click', () => saveCagePlan(false));
+document.getElementById('cpClear').addEventListener('click', () => saveCagePlan(true));
+document.getElementById('cpCancel').addEventListener('click', closeCagePlanSheet);
+document.getElementById('cpBackdrop').addEventListener('click', closeCagePlanSheet);
+
+// --- Player side ---
+function updateCagePlanButton() {
+  renderHomeNote();
+  const sub = document.getElementById('cagePlanSub');
+  if (!sub || !currentPlayerId) return;
+  const focus = cagePlans[currentPlayerId]?.focus || [];
+  sub.textContent = focus.length ? focus.map(focusName).join(' · ') : 'Coach hasn\'t set your plan yet';
+}
+async function openCageView() {
+  if (!currentPlayerId) return;
+  showView('view-cage');
+  window.scrollTo(0, 0);
+  const p = CLIENTS.find(r => r.id === currentPlayerId);
+  document.getElementById('cgPlayer').textContent = p ? p.name : '';
+  document.getElementById('cgBody').innerHTML = '<div class="cg-empty">Loading your plan…</div>';
+  await Promise.all([fetchCagePlans(), fetchCageStats()]);
+  renderCageView();
+}
+function renderCageView() {
+  const plan = cagePlans[currentPlayerId];
+  const focus = plan?.focus || [];
+  document.getElementById('cgChips').innerHTML = focus.map(f => `<span class="cg-chip">${cgEsc(focusName(f))}</span>`).join('');
+  const body = document.getElementById('cgBody');
+  if (!focus.length) {
+    body.innerHTML = `<div class="cg-empty"><b>NO PLAN YET</b>Coach hasn't set your cage plan. Ask Coach Devan what to work on.<br><button class="cg-back" id="cgBack">◂ BACK</button></div>`;
+    document.getElementById('cgBack').onclick = () => showView('view-main');
+    return;
+  }
+  const sessionNo = cageStats[currentPlayerId]?.count || 0;
+  const session = buildCageSession(focus, sessionNo);
+  const steps = [
+    { key: 'warmup', title: session.warmup.name, focus: 'Get ready', minutes: session.warmup.minutes, stepsList: session.warmup.steps, cue: session.warmup.cue },
+    ...session.blocks.map((b, i) => ({ key: 'b' + i, title: b.drill.name, focus: b.step ? `${b.focus.name} · ${b.step}/${b.of}` : b.focus.name, minutes: b.drill.minutes, drill: b.drill, bench: getBenchmark(b.drill) })),
+    { key: 'finisher', title: session.finisher.name, focus: 'Compete', minutes: session.finisher.minutes, stepsList: session.finisher.steps, cue: session.finisher.cue, bench: getBenchmark(session.finisher) }
+  ];
+  cgState = { steps, done: new Set(), timers: {}, bench: {}, session };
+  const note = plan.note ? `<div class="cg-note"><b>FROM COACH</b>${cgEsc(plan.note)}</div>` : '';
+  body.innerHTML = note + `
+    <div class="cg-progress"><div id="cgBar"></div></div>
+    <div class="cg-progress-label" id="cgProgLabel">0 / ${steps.length} done · session #${sessionNo + 1} · about ${session.minutes} min</div>
+    ${((f) => f && f.intro ? `<div class="cg-intro"><b>START HERE · ${cgEsc(f.name.toUpperCase())}</b><p>${cgEsc(f.intro.text)}</p><a class="cg-video" href="${cgEsc(f.intro.url)}" target="_blank" rel="noopener"><b>▶ WATCH</b>${cgEsc(f.intro.label)}</a></div>` : '')(session.todaySeries)}
+    ${session.seriesCount > 1 ? `<div class="cg-note" style="border-left-color:var(--cyan);background:rgba(0,191,255,.08)"><b style="color:var(--cyan)">TODAY'S SERIES</b>${cgEsc(session.todaySeries.name)}. Your series rotate each session, so next time you'll get ${cgEsc(buildCageSession(focus, sessionNo + 1).todaySeries.name)}.</div>` : ''}
+    ${steps.map((st, i) => {
+      const d = st.drill;
+      const list = d ? d.steps : st.stepsList;
+      return `<div class="cg-block" id="cgb-${st.key}">
+        <div class="cg-block-top"><span class="cg-step-no">STEP ${i + 1} OF ${steps.length}</span><span class="cg-focus">${cgEsc(st.focus)}</span></div>
+        <div class="cg-title">${cgEsc(st.title)}</div>
+        <div class="cg-meta"><span>${st.minutes} min</span>${d ? `<span class="${d.feeder === 'tosser' ? 'tosser' : ''}">${d.feeder === 'tosser' ? 'Needs a tosser' : 'Solo'}</span><span>${cgEsc(d.equip)}</span>` : ''}</div>
+        ${d && d.detail ? `<div class="cg-detail"><span>THE DETAIL</span>${cgEsc(d.detail)}</div>` : ''}
+        <ol>${list.map(x => `<li>${cgEsc(x)}</li>`).join('')}</ol>
+        ${d ? `<div class="cg-row"><b>Reps:</b> ${cgEsc(d.reps)}</div>` : ''}
+        <div class="cg-cue"><small>COACH CUE</small>${cgEsc(d ? d.cue : st.cue)}</div>
+        ${d && d.video ? `<a class="cg-video" href="${cgEsc(d.video.url)}" target="_blank" rel="noopener"><b>▶ WATCH HOW</b>${cgEsc(d.video.label)}</a>` : ''}
+        ${d && !d.video && d.source ? `<div class="cg-video pending">▶ Video coming soon. Ask Coach to show you this one.</div>` : ''}
+        ${d ? `<div class="cg-row"><b>You got it when:</b> ${cgEsc(d.check)}</div><div class="cg-row"><b>Watch for:</b> ${cgEsc(d.mistake)}</div>` : ''}
+        ${st.bench ? `<div class="cg-bench" id="cgbench-${st.key}"><small>BENCHMARK</small><div class="bl">${cgEsc(st.bench.label)}</div><div class="bp">${cgEsc(st.bench.prompt)}</div>
+          ${st.bench.kind === 'yesno' ? `<div class="cg-yn"><button class="y" data-yn="${st.key}" data-v="1">✓ Yes</button><button class="n" data-yn="${st.key}" data-v="0">Not yet</button></div>`
+            : `<div class="cg-step"><button data-dec="${st.key}">−</button><div class="val" id="cgv-${st.key}">– <span>of ${st.bench.of}</span></div><button data-inc="${st.key}">+</button></div>`}
+          <div class="cg-bres" id="cgr-${st.key}"></div></div>` : ''}
+        <div class="cg-actions">
+          <div class="cg-timer" id="cgt-${st.key}">${String(st.minutes).padStart(2, '0')}:00</div>
+          <button class="cg-btn start" data-timer="${st.key}">START</button>
+          <button class="cg-btn done" data-done="${st.key}">✓ DONE</button>
+        </div>
+      </div>`;
+    }).join('')}
+    <button class="cg-finish" id="cgFinish" disabled>FINISH ALL STEPS TO COMPLETE</button>
+    <div style="display:flex;gap:8px;margin-top:14px"><button class="lib-btn" id="cgMyFb" style="margin:0;flex:1">💬 COACH FEEDBACK</button><button class="lib-btn" id="cgSendVid" style="margin:0;flex:1">📹 SEND A VIDEO</button></div>
+    <div style="text-align:center"><button class="cg-back" id="cgBack">◂ BACK</button></div>`;
+  document.getElementById('cgMyFb').onclick = openMyFeedback;
+  document.getElementById('cgSendVid').onclick = () => { stopAllCgTimers(); renderVideoForm(document.getElementById('cgBody'), focus); window.scrollTo(0, 0); };
+  body.querySelectorAll('[data-inc],[data-dec]').forEach(b => b.addEventListener('click', () => {
+    const key = b.dataset.inc || b.dataset.dec, st = cgState.steps.find(x => x.key === key);
+    if (cgState.done.has(key)) return;
+    let v = cgState.bench[key]; v = v == null ? (b.dataset.inc ? st.bench.target : st.bench.target - 1) : v + (b.dataset.inc ? 1 : -1);
+    cgState.bench[key] = Math.max(0, Math.min(st.bench.of, v)); showBench(key);
+  }));
+  body.querySelectorAll('[data-yn]').forEach(b => b.addEventListener('click', () => {
+    const key = b.dataset.yn; if (cgState.done.has(key)) return;
+    cgState.bench[key] = b.dataset.v === '1';
+    document.querySelectorAll(`[data-yn="${key}"]`).forEach(x => x.classList.toggle('on', x === b)); showBench(key);
+  }));
+  body.querySelectorAll('[data-timer]').forEach(b => b.addEventListener('click', () => toggleCgTimer(b.dataset.timer, b)));
+  body.querySelectorAll('[data-done]').forEach(b => b.addEventListener('click', () => markCgDone(b.dataset.done, b)));
+  document.getElementById('cgFinish').addEventListener('click', completeCageSession);
+  document.getElementById('cgBack').onclick = () => { stopAllCgTimers(); showView('view-main'); };
+}
+
+function showBench(key) {
+  const st = cgState.steps.find(x => x.key === key), v = cgState.bench[key];
+  const valEl = document.getElementById('cgv-' + key);
+  if (valEl) valEl.innerHTML = `${v == null ? '–' : v} <span>of ${st.bench.of}</span>`;
+  const hit = benchHit(st.bench, v), r = document.getElementById('cgr-' + key);
+  r.className = 'cg-bres ' + (hit == null ? '' : hit ? 'hit' : 'miss');
+  r.textContent = hit == null ? '' : hit ? '✓ BENCHMARK HIT' : `NOT YET · need ${st.bench.kind === 'yesno' ? 'a yes' : st.bench.target + ' of ' + st.bench.of}`;
+}
+function toggleCgTimer(key, btn) {
+  const t = cgState.timers[key];
+  if (t && t.handle) { clearInterval(t.handle); t.handle = null; btn.textContent = 'RESUME'; return; }
+  const st = cgState.steps.find(x => x.key === key);
+  const timer = t || (cgState.timers[key] = { left: st.minutes * 60, handle: null });
+  btn.textContent = 'PAUSE';
+  timer.handle = setInterval(() => {
+    timer.left--;
+    const el = document.getElementById('cgt-' + key);
+    if (!el) { clearInterval(timer.handle); return; }
+    const a = Math.abs(timer.left);
+    el.textContent = (timer.left < 0 ? '+' : '') + String(Math.floor(a / 60)).padStart(2, '0') + ':' + String(a % 60).padStart(2, '0');
+    el.classList.toggle('up', timer.left <= 0);
+    if (timer.left === 0 && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  }, 1000);
+}
+function stopAllCgTimers() { if (!cgState) return; Object.values(cgState.timers).forEach(t => t.handle && clearInterval(t.handle)); }
+function markCgDone(key, btn) {
+  const stp = cgState.steps.find(x => x.key === key);
+  if (stp.bench && cgState.bench[key] == null) {
+    const r = document.getElementById('cgr-' + key); r.className = 'cg-bres miss'; r.textContent = 'Enter your benchmark first';
+    document.getElementById('cgbench-' + key).scrollIntoView({ behavior: 'smooth', block: 'center' }); return;
+  }
+  const t = cgState.timers[key]; if (t && t.handle) { clearInterval(t.handle); t.handle = null; }
+  cgState.done.add(key);
+  document.getElementById('cgb-' + key).classList.add('done');
+  btn.disabled = true; btn.textContent = '✓ DONE';
+  const startBtn = document.querySelector(`[data-timer="${key}"]`); if (startBtn) startBtn.disabled = true;
+  const n = cgState.done.size, total = cgState.steps.length;
+  document.getElementById('cgBar').style.width = (n / total * 100) + '%';
+  document.getElementById('cgProgLabel').textContent = `${n} / ${total} done · session #${(cageStats[currentPlayerId]?.count || 0) + 1}`;
+  const fin = document.getElementById('cgFinish');
+  if (n === total) { fin.disabled = false; fin.textContent = '✓ COMPLETE SESSION'; }
+  const next = cgState.steps.find(x => !cgState.done.has(x.key));
+  if (next) document.getElementById('cgb-' + next.key).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+async function completeCageSession() {
+  const fin = document.getElementById('cgFinish');
+  fin.disabled = true; fin.textContent = 'SAVING…';
+  const player = CLIENTS.find(p => p.id === currentPlayerId);
+  const focus = cagePlans[currentPlayerId]?.focus || [];
+  try {
+    const benched = cgState.steps.filter(x => x.bench);
+    const results = benched.map(x => ({ id: x.drill ? x.drill.id : x.key, name: x.title, value: cgState.bench[x.key], target: x.bench.kind === 'yesno' ? 'yes' : x.bench.target, of: x.bench.of || null, hit: benchHit(x.bench, cgState.bench[x.key]) }));
+    const hit = results.filter(r => r.hit).length, total = results.length;
+    const result = sessionResult(hit, total), mastered = total > 0 && hit === total;
+    const seriesId = cgState.session.todaySeries ? cgState.session.todaySeries.id : null;
+    const { data: rep, error: repErr } = await supabase.from('feedback').insert({
+      client_id: currentPlayerId, client_name: player.name, focus, result, mastered,
+      benchmarks: results, series: seriesId, hit, total
+    }).select().single();
+    if (repErr) throw repErr;
+    stopAllCgTimers();
+    cageStats[currentPlayerId] = { count: (cageStats[currentPlayerId]?.count || 0) + 1, last: new Date().toISOString() };
+    const streak = seriesId ? await seriesStreak(currentPlayerId, seriesId) : 0;
+    renderSessionSummary(document.getElementById('cgBody'), { focus, results, hit, total, result, mastered, seriesName: cgState.session.todaySeries ? cgState.session.todaySeries.name : null, streak, reportId: rep ? rep.id : null });
+    window.scrollTo(0, 0);
+  } catch (e) {
+    console.warn(e);
+    fin.disabled = false; fin.textContent = 'SAVE FAILED · TAP TO RETRY';
+  }
+}
+
+
+// ===== FEEDBACK + VIDEO =====
+const FB_BUCKET = 'videos';
+const FB_MAX_MB = 50, FB_MAX_SEC = 120, FB_SHRINK_OVER_MB = 45;
+const FB_RESULTS = { nailed: { icon: '✅', label: 'Nailed it' }, getting: { icon: '🟡', label: 'Getting there' }, struggled: { icon: '🔴', label: 'Struggled' } };
+let fbRows = [];
+let fbState = null; // player form state
+let rvState = null; // coach review state
+
+async function fetchFeedback(playerId) {
+  let q = supabase.from('feedback').select('*').order('created_at', { ascending: false }).limit(200);
+  if (playerId) q = q.eq('client_id', playerId);
+  const { data, error } = await q;
+  if (error) { console.warn('feedback', error); return []; }
+  return data || [];
+}
+async function signedUrl(path) {
+  if (!path) return null;
+  const { data, error } = await supabase.storage.from(FB_BUCKET).createSignedUrl(path, 3600);
+  if (error) { console.warn('sign', error); return null; }
+  return data.signedUrl;
+}
+function fbWhen(ts) {
+  const d = new Date(ts);
+  return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+function videoDuration(file) {
+  return new Promise(res => {
+    const v = document.createElement('video');
+    v.preload = 'metadata';
+    v.onloadedmetadata = () => { URL.revokeObjectURL(v.src); res(v.duration); };
+    v.onerror = () => res(null);
+    v.src = URL.createObjectURL(file);
+  });
+}
+
+// --- Player: SESSION REPORT (scored from benchmarks) ---
+async function seriesStreak(playerId, seriesId) {
+  const { data } = await supabase.from('feedback').select('series, mastered, created_at').eq('client_id', playerId).eq('series', seriesId).order('created_at', { ascending: false }).limit(10);
+  let n = 0; for (const r of data || []) { if (r.mastered) n++; else break; } return n;
+}
+function renderSessionSummary(targetEl, d) {
+  const R = FB_RESULTS[d.result];
+  targetEl.innerHTML = `<div class="fb-card">
+      <h3>SESSION COMPLETE</h3>
+      <div class="sum-big"><div class="n">${d.hit} / ${d.total}</div><div class="t">benchmarks hit</div></div>
+      <div style="text-align:center;margin-bottom:10px"><span class="fb-badge res-${d.result}" style="font-size:13px;padding:6px 12px">${R.icon} ${d.mastered ? 'MASTERED' : R.label.toUpperCase()}</span></div>
+      ${d.results.map(r => `<div class="sum-row"><span>${cgEsc(r.name)}</span><b class="${r.hit ? 'hit' : 'miss'}">${r.target === 'yes' ? (r.value ? 'Yes' : 'Not yet') : r.value + ' of ' + r.of}${r.hit ? ' ✓' : ''}</b></div>`).join('')}
+      ${d.streak >= SERIES_MASTERY_STREAK ? `<div class="sum-master"><b>SERIES MASTERED</b>${cgEsc(d.seriesName)}: mastered ${d.streak} sessions in a row. Tell Coach you are ready for the next one.</div>`
+        : d.mastered && d.seriesName ? `<div class="fb-quote" style="border-left-color:var(--gold)">Master ${cgEsc(d.seriesName)} ${SERIES_MASTERY_STREAK - d.streak} more time${SERIES_MASTERY_STREAK - d.streak === 1 ? '' : 's'} in a row to master the series.</div>` : ''}
+      <div class="fb-label">NOTE FOR COACH (OPTIONAL)</div>
+      <textarea class="cp-note-in" id="fbNote" maxlength="400" placeholder="What felt good? What was hard?"></textarea>
+      <div class="fb-status" id="fbStatus">Your results were sent to Coach.</div>
+      <button class="fb-send" id="fbSend">SAVE NOTE</button>
+    </div>`;
+  document.getElementById('fbSend').onclick = async () => {
+    const note = document.getElementById('fbNote').value.trim(), st = document.getElementById('fbStatus');
+    if (note && d.reportId) {
+      const { error } = await supabase.from('feedback').update({ note }).eq('id', d.reportId);
+      if (error) { st.classList.add('err'); st.textContent = 'Could not save the note. Try again.'; return; }
+    }
+    reportDone(targetEl, d.focus, true);
+  };
+}
+function reportDone(targetEl, focus, saved) {
+  targetEl.innerHTML = `<div class="cg-empty"><b>${saved ? 'REPORT SAVED' : 'NICE WORK'}</b>${saved ? 'Coach will see how it went.' : ''} Your next session rotates to new drills.<br><span style="color:var(--cyan)">HITTING 2.0</span>
+      <button class="lib-btn" id="rdVideo" style="margin:16px auto 0">📹 SEND COACH A VIDEO TOO</button>
+      <br><button class="cg-back" id="rdBack">◂ BACK TO HOME</button></div>`;
+  document.getElementById('rdBack').onclick = () => showView('view-main');
+  document.getElementById('rdVideo').onclick = () => renderVideoForm(targetEl, focus);
+}
+
+// --- Player: SEND COACH A VIDEO (any time) ---
+function renderVideoForm(targetEl, focus) {
+  fbState = { file: null, focus: focus || [] };
+  targetEl.innerHTML = `<div class="fb-card">
+      <h3>SEND COACH A VIDEO</h3>
+      <div class="fb-sub">Players or parents can send a clip (up to 2 minutes) for Coach to review and talk over.</div>
+      <div class="fb-label">VIDEO</div>
+      <label class="fb-file" id="fbFileLabel">📹 Pick or record a video<small>Up to 2 minutes. Big videos get shrunk automatically.</small><input type="file" id="fbFile" accept="video/*"></label>
+      <div class="fb-label">WHAT SHOULD COACH LOOK AT? (OPTIONAL)</div>
+      <textarea class="cp-note-in" id="fbNote" maxlength="400" placeholder="Example: Inside Lane dry reps, does my barrel stay behind?"></textarea>
+      <div class="fb-status" id="fbStatus"></div>
+      <button class="fb-send" id="fbSend">SEND TO COACH</button>
+      <button class="fb-skip" id="fbSkip">Cancel</button>
+    </div>`;
+  document.getElementById('fbFile').addEventListener('change', async e => {
+    const f = e.target.files[0];
+    const st = document.getElementById('fbStatus'); st.classList.remove('err');
+    if (!f) { fbState.file = null; return; }
+    const dur = await videoDuration(f);
+    if (dur && dur > FB_MAX_SEC + 1) { fbState.file = null; e.target.value = ''; st.classList.add('err'); st.textContent = `That video is ${Math.round(dur)} seconds. Max is 2 minutes. Trim it first.`; return; }
+    fbState.file = f;
+    document.getElementById('fbFileLabel').firstChild.textContent = '✓ Video ready: ' + f.name.slice(0, 28) + ' ';
+    const big = f.size > FB_SHRINK_OVER_MB * 1048576;
+    st.textContent = `${(f.size / 1048576).toFixed(1)} MB${dur ? ' · ' + Math.round(dur) + ' sec' : ''}${big ? ' · will be shrunk before upload' : ''}`;
+  });
+  document.getElementById('fbSkip').addEventListener('click', () => { stopAllCgTimers(); renderHome(); showView('view-main'); });
+  document.getElementById('fbSend').addEventListener('click', () => submitVideo(targetEl));
+}
+// Shrinks a large phone video on the device (about 480p) so it fits the 50 MB upload limit.
+// Plays the video once at normal speed into a canvas and records it, with its audio. Takes about as long as the clip.
+function shrinkVideo(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const types = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    const mime = types.find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t));
+    const canvas = document.createElement('canvas');
+    if (!mime || !canvas.captureStream) { reject(new Error('unsupported')); return; }
+    const v = document.createElement('video');
+    v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
+    let ctx, audioCtx, rec, raf, chunks = [];
+    const cleanup = () => { cancelAnimationFrame(raf); try { audioCtx && audioCtx.close(); } catch (e) {} URL.revokeObjectURL(v.src); };
+    v.onloadedmetadata = () => {
+      const scale = Math.min(1, 854 / Math.max(v.videoWidth, v.videoHeight));
+      canvas.width = Math.round(v.videoWidth * scale / 2) * 2; canvas.height = Math.round(v.videoHeight * scale / 2) * 2;
+      ctx = canvas.getContext('2d');
+      const stream = canvas.captureStream(30);
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const src = audioCtx.createMediaElementSource(v);
+        const dest = audioCtx.createMediaStreamDestination(); // not connected to the speakers, so it stays silent
+        src.connect(dest);
+        dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+      } catch (e) { /* no audio track: video only */ }
+      rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 1200000, audioBitsPerSecond: 96000 });
+      rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+      rec.onstop = () => { cleanup(); resolve(new File([new Blob(chunks, { type: mime.split(';')[0] })], 'clip.' + (mime.includes('mp4') ? 'mp4' : 'webm'), { type: mime.split(';')[0] })); };
+      const draw = () => { ctx.drawImage(v, 0, 0, canvas.width, canvas.height); if (onProgress && v.duration) onProgress(v.currentTime / v.duration); raf = requestAnimationFrame(draw); };
+      v.onended = () => { if (rec.state !== 'inactive') rec.stop(); };
+      v.onerror = () => { cleanup(); reject(new Error('play')); };
+      rec.start(1000); draw();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    };
+    v.play().catch(err => { cleanup(); reject(err); });
+  });
+}
+async function submitVideo(targetEl) {
+  const st = document.getElementById('fbStatus'); st.classList.remove('err');
+  if (!fbState.file) { st.classList.add('err'); st.textContent = 'Pick a video first.'; return; }
+  const btn = document.getElementById('fbSend'); btn.disabled = true;
+  const player = CLIENTS.find(p => p.id === currentPlayerId);
+  let videoPath = null;
+  try {
+    if (fbState.file && fbState.file.size > FB_SHRINK_OVER_MB * 1048576) {
+      btn.textContent = 'SHRINKING VIDEO…';
+      st.textContent = 'Getting the video ready. Keep this screen open (takes about as long as the video).';
+      let small;
+      try { small = await shrinkVideo(fbState.file, p => { st.textContent = `Getting the video ready… ${Math.round(p * 100)}%. Keep this screen open.`; }); }
+      catch (e) { throw new Error('shrink'); }
+      if (small.size > FB_MAX_MB * 1048576) throw new Error('toobig');
+      fbState.file = small;
+    }
+    if (fbState.file) {
+      btn.textContent = 'UPLOADING VIDEO…';
+      st.textContent = 'Uploading. Keep this screen open until it finishes.';
+      const ext = (fbState.file.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '');
+      videoPath = `${currentPlayerId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage.from(FB_BUCKET).upload(videoPath, fbState.file, { contentType: fbState.file.type || 'video/mp4', upsert: false });
+      if (upErr) throw upErr;
+    }
+    btn.textContent = 'SENDING…';
+    const { error } = await supabase.from('feedback').insert({
+      client_id: currentPlayerId, client_name: player ? player.name : '',
+      focus: fbState.focus,
+      note: document.getElementById('fbNote').value.trim() || null, video_path: videoPath
+    });
+    if (error) throw error;
+    targetEl.innerHTML = `<div class="cg-empty"><b>SENT TO COACH</b>Coach will watch your video and send feedback. You will see it under Coach Feedback.<br><span style="color:var(--cyan)">HITTING 2.0</span><br><button class="cg-back" id="cgBack3">◂ BACK TO HOME</button></div>`;
+    document.getElementById('cgBack3').onclick = () => showView('view-main');
+  } catch (e) {
+    console.warn(e);
+    btn.disabled = false; btn.textContent = 'SEND TO COACH';
+    st.classList.add('err');
+    st.textContent = e && e.message === 'shrink' ? 'This phone could not shrink the video. Trim it shorter or film in 720p, then try again.'
+      : e && e.message === 'toobig' ? 'Still too big after shrinking. Trim it shorter and try again.'
+      : 'Upload failed. Check your connection and try again.';
+  }
+}
+
+// --- Player: coach feedback list + voice-over playback ---
+async function openMyFeedback() {
+  showView('view-myfeedback'); window.scrollTo(0, 0);
+  const p = CLIENTS.find(r => r.id === currentPlayerId);
+  document.getElementById('mfPlayer').textContent = p ? p.name : '';
+  const body = document.getElementById('mfBody');
+  body.innerHTML = '<div class="cg-empty">Loading…</div>';
+  const rows = (await fetchFeedback(currentPlayerId)).filter(r => r.video_path);
+  if (!rows.length) { body.innerHTML = '<div class="cg-empty"><b>NOTHING YET</b>Send Coach a video after a cage session and his feedback shows up here.<br><button class="cg-back" id="mfBack">◂ BACK</button></div>'; document.getElementById('mfBack').onclick = () => openCageView(); return; }
+  body.innerHTML = rows.map(r => `<div class="fb-list-item" data-id="${r.id}">
+      <div class="fb-li-main"><div class="fb-li-name">📹 ${fbWhen(r.created_at)}</div>
+      <div class="fb-li-meta">${r.note ? cgEsc(r.note.slice(0, 50)) : 'Video for Coach'}</div></div>
+      ${r.coach_reviewed_at ? '<span class="fb-badge done">COACH REPLIED</span>' : '<span class="fb-badge" style="background:rgba(255,255,255,.08);color:var(--muted)">WAITING</span>'}
+    </div>`).join('') + '<div style="text-align:center"><button class="cg-back" id="mfBack">◂ BACK TO CAGE PLAN</button></div><div id="mfDetail"></div>';
+  document.getElementById('mfBack').onclick = () => openCageView();
+  body.querySelectorAll('.fb-list-item').forEach(el => el.addEventListener('click', () => showMyFeedbackDetail(rows.find(r => String(r.id) === el.dataset.id))));
+}
+async function showMyFeedbackDetail(r) {
+  const el = document.getElementById('mfDetail');
+  el.innerHTML = '<div class="cg-empty">Loading video…</div>';
+  const [vurl, aurl] = await Promise.all([signedUrl(r.video_path), signedUrl(r.coach_audio_path)]);
+  const rate = parseFloat(((r.coach_audio_type || '').match(/rate=([\d.]+)/) || [])[1] || '1');
+  el.innerHTML = `<div class="fb-card">
+      <h3>${fbWhen(r.created_at)}</h3>
+      ${r.note ? `<div class="fb-label">YOUR NOTE</div><div class="fb-quote">${cgEsc(r.note)}</div>` : ''}
+      ${r.coach_note ? `<div class="fb-label">FROM COACH</div><div class="fb-quote" style="border-left-color:var(--gold)">${cgEsc(r.coach_note)}</div>` : ''}
+      ${vurl ? `<video class="fb-video" id="mfVideo" src="${vurl}" playsinline controls preload="metadata"></video>` : ''}
+      ${vurl && aurl ? `<button class="fb-send" id="mfPlayVO">▶ PLAY WITH COACH'S VOICE-OVER</button><div class="fb-status">Plays your video with Coach talking over it${rate !== 1 ? ' (slow motion)' : ''}.</div><audio id="mfAudio" src="${aurl}" preload="auto"></audio>` : ''}
+      ${!r.coach_reviewed_at ? '<div class="fb-status">Coach hasn\'t reviewed this one yet.</div>' : ''}
+    </div>`;
+  if (vurl && aurl) wireVoiceover(document.getElementById('mfVideo'), document.getElementById('mfAudio'), document.getElementById('mfPlayVO'), rate);
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+// Keeps the coach's recorded audio in sync with the (muted) video. Audio time t matches video time t * rate.
+function wireVoiceover(video, audio, btn, rate) {
+  let on = false;
+  const sync = () => { if (on && Math.abs(audio.currentTime - video.currentTime / rate) > 0.35) audio.currentTime = video.currentTime / rate; };
+  btn.addEventListener('click', () => {
+    on = true; video.muted = true; video.playbackRate = rate; video.currentTime = 0; audio.currentTime = 0;
+    video.play(); audio.play().catch(() => {});
+  });
+  video.addEventListener('play', () => { if (on) { sync(); audio.play().catch(() => {}); } });
+  video.addEventListener('pause', () => { if (on) audio.pause(); });
+  video.addEventListener('seeked', sync);
+  video.addEventListener('ended', () => { if (on) audio.pause(); });
+  video.addEventListener('ratechange', () => { if (on && video.playbackRate !== rate) video.playbackRate = rate; });
+}
+
+// --- Coach: feedback list + review with voice-over recording ---
+async function refreshCoachFeedback() {
+  fbRows = await fetchFeedback();
+  renderCoachFeedback();
+}
+function renderCoachFeedback() {
+  const el = document.getElementById('coachFeedback');
+  if (!el) return;
+  const vids = fbRows.filter(r => r.video_path);
+  const pending = vids.filter(r => !r.coach_reviewed_at).length;
+  document.getElementById('fbSummary').textContent = pending ? `${pending} to review` : (vids.length ? 'all caught up' : '');
+  el.innerHTML = !vids.length ? '<div class="cp-hint" style="text-align:left">No videos yet.</div>' :
+    [...vids].sort((a, b) => (!!a.coach_reviewed_at - !!b.coach_reviewed_at) || (new Date(b.created_at) - new Date(a.created_at))).slice(0, 40).map(r => `<div class="fb-list-item" data-id="${r.id}">
+      <div class="fb-li-main"><div class="fb-li-name">📹 ${cgEsc(r.client_name)}</div>
+      <div class="fb-li-meta">${fbWhen(r.created_at)}${r.note ? ' · ' + cgEsc(r.note.slice(0, 40)) : ''}</div></div>
+      ${r.coach_reviewed_at ? '<span class="fb-badge done">REPLIED</span>' : '<span class="fb-badge new">REVIEW</span>'}
+    </div>`).join('');
+  el.querySelectorAll('.fb-list-item').forEach(row => row.addEventListener('click', () => openReview(fbRows.find(r => String(r.id) === row.dataset.id))));
+  // Session reports
+  const rep = document.getElementById('coachReports');
+  const reports = fbRows.filter(r => !r.video_path && r.result);
+  const mastered = reports.filter(r => r.mastered).length, struggled = reports.filter(r => r.result === 'struggled').length;
+  document.getElementById('srSummary').textContent = reports.length ? `${mastered} mastered · ${struggled} struggled` : '';
+  rep.innerHTML = !reports.length ? '<div class="cp-hint" style="text-align:left">No session reports yet.</div>' :
+    reports.slice(0, 40).map(r => `<div class="fb-list-item" style="cursor:default;flex-wrap:wrap">
+      <div class="fb-li-main"><div class="fb-li-name">${cgEsc(r.client_name)}</div>
+      <div class="fb-li-meta">${fbWhen(r.created_at)}${r.total ? ` · <b style="color:var(--white)">${r.hit}/${r.total} benchmarks</b>` : ''}${r.series ? ' · ' + cgEsc(focusName(r.series)) : ((r.focus || []).length ? ' · ' + cgEsc((r.focus || []).map(focusName).join(', ')) : '')}</div>
+      ${r.note ? `<div class="fb-quote" style="margin:6px 0 0;font-size:12px">${cgEsc(r.note)}</div>` : ''}</div>
+      ${r.mastered ? '<span class="fb-badge" style="background:var(--gold);color:var(--navy-1)">MASTERED</span>' : ''}
+      <span class="fb-badge res-${r.result}">${FB_RESULTS[r.result].label.toUpperCase()}</span>
+    </div>`).join('');
+}
+async function openReview(r) {
+  if (!r) return;
+  showView('view-review'); window.scrollTo(0, 0);
+  document.getElementById('rvPlayer').textContent = `${r.client_name} · ${fbWhen(r.created_at)}`;
+  const body = document.getElementById('rvBody');
+  body.innerHTML = '<div class="cg-empty">Loading…</div>';
+  const vurl = await signedUrl(r.video_path);
+  rvState = { row: r, rate: 1, recorder: null, chunks: [], blob: null, mime: null, stream: null };
+  const focusTxt = (r.focus || []).map(focusName).join(' · ');
+  body.innerHTML = `<div class="fb-card">
+      <h3>📹 VIDEO FROM ${cgEsc((r.client_name || '').toUpperCase())}</h3>
+      <div class="fb-sub">${cgEsc(focusTxt ? 'Plan: ' + focusTxt : 'No plan listed')}</div>
+      ${r.note ? `<div class="fb-label">WHAT TO LOOK AT</div><div class="fb-quote">${cgEsc(r.note)}</div>` : ''}
+      ${vurl ? `<video class="fb-video" id="rvVideo" src="${vurl}" playsinline controls preload="auto"></video>
+        <div class="fb-label">VOICE-OVER</div>
+        <div class="fb-speed" id="rvSpeed"><button data-rate="1" class="on">Normal speed</button><button data-rate="0.5">Slow motion</button></div>
+        <div class="fb-rec-row"><button class="fb-rec" id="rvRec">🎙 RECORD VOICE-OVER</button><button class="fb-ghost" id="rvPreview" disabled>▶ PREVIEW</button></div>
+        <div class="fb-status" id="rvStatus">Tap record: the video plays from the start while you talk. It stops at the end of the video, or tap stop.</div>
+        <audio id="rvAudio" preload="auto"></audio>` : '<div class="fb-status">No video on this one.</div>'}
+      <div class="fb-label">TYPED NOTE (OPTIONAL)</div>
+      <textarea class="cp-note-in" id="rvNote" maxlength="400" placeholder="Short note the player will see">${cgEsc(r.coach_note || '')}</textarea>
+      <button class="fb-send" id="rvSend">SEND TO PLAYER</button>
+      <div class="fb-status" id="rvSendStatus">${r.coach_reviewed_at ? 'Already replied ' + fbWhen(r.coach_reviewed_at) + '. Sending again replaces it.' : ''}</div>
+    </div>
+    <button class="fb-skip" id="rvDelete" style="color:#ff8a9a;font-size:13px;margin-top:16px">🗑 Delete this video and feedback</button>
+    <div style="text-align:center"><button class="cg-back" id="rvBack">◂ BACK TO COACH</button></div>`;
+  document.getElementById('rvBack').onclick = () => { stopRvStream(); showView('view-coach'); };
+  document.getElementById('rvDelete').onclick = deleteReview;
+  document.getElementById('rvSend').onclick = sendReview;
+  if (!vurl) return;
+  document.querySelectorAll('#rvSpeed button').forEach(b => b.addEventListener('click', () => {
+    if (rvState.recorder) return;
+    rvState.rate = parseFloat(b.dataset.rate);
+    document.querySelectorAll('#rvSpeed button').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  document.getElementById('rvRec').onclick = toggleRecording;
+  document.getElementById('rvPreview').onclick = () => {
+    const v = document.getElementById('rvVideo'), a = document.getElementById('rvAudio');
+    v.muted = true; v.playbackRate = rvState.rate; v.currentTime = 0; a.currentTime = 0; v.play(); a.play().catch(() => {});
+    v.onpause = () => a.pause(); v.onended = () => a.pause();
+  };
+}
+function stopRvStream() { if (rvState && rvState.stream) { rvState.stream.getTracks().forEach(t => t.stop()); rvState.stream = null; } }
+async function toggleRecording() {
+  const btn = document.getElementById('rvRec'), st = document.getElementById('rvStatus'), v = document.getElementById('rvVideo');
+  if (rvState.recorder) { rvState.recorder.stop(); return; }
+  try {
+    rvState.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (e) { st.textContent = 'Microphone blocked. Allow mic access for this site in your browser settings.'; return; }
+  const types = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'];
+  rvState.mime = types.find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || '';
+  const rec = new MediaRecorder(rvState.stream, rvState.mime ? { mimeType: rvState.mime } : undefined);
+  rvState.recorder = rec; rvState.chunks = [];
+  rec.ondataavailable = e => { if (e.data.size) rvState.chunks.push(e.data); };
+  rec.onstop = () => {
+    v.pause(); v.onended = null;
+    rvState.blob = new Blob(rvState.chunks, { type: rec.mimeType || rvState.mime || 'audio/webm' });
+    rvState.mime = rvState.blob.type;
+    document.getElementById('rvAudio').src = URL.createObjectURL(rvState.blob);
+    rvState.recorder = null; stopRvStream();
+    btn.classList.remove('live'); btn.textContent = '🎙 RE-RECORD';
+    document.getElementById('rvPreview').disabled = false;
+    st.textContent = 'Got it. Tap Preview to check it, then Send to Player.';
+  };
+  v.muted = true; v.playbackRate = rvState.rate; v.currentTime = 0;
+  v.onended = () => { if (rvState.recorder) rvState.recorder.stop(); };
+  rec.start();
+  await v.play().catch(() => {});
+  btn.classList.add('live'); btn.textContent = '■ STOP';
+  st.textContent = 'Recording… talk through what you see.';
+}
+
+async function deleteReview() {
+  const btn = document.getElementById('rvDelete'), r = rvState.row;
+  if (!btn.dataset.armed) { btn.dataset.armed = '1'; btn.textContent = '⚠ Tap again to permanently delete'; setTimeout(() => { if (btn.isConnected) { delete btn.dataset.armed; btn.textContent = '🗑 Delete this video and feedback'; } }, 4000); return; }
+  btn.disabled = true; btn.textContent = 'Deleting…';
+  const paths = [r.video_path, r.coach_audio_path].filter(Boolean);
+  if (paths.length) {
+    const { error: sErr } = await supabase.storage.from(FB_BUCKET).remove(paths);
+    if (sErr) { btn.disabled = false; btn.textContent = 'Delete failed. Try again.'; console.warn(sErr); return; }
+  }
+  const { error } = await supabase.from('feedback').delete().eq('id', r.id);
+  if (error) { btn.disabled = false; btn.textContent = 'Delete failed. Try again.'; console.warn(error); return; }
+  stopRvStream(); showView('view-coach'); refreshCoachFeedback();
+}
+async function sendReview() {
+  const r = rvState.row, st = document.getElementById('rvSendStatus'), btn = document.getElementById('rvSend');
+  const note = document.getElementById('rvNote').value.trim();
+  if (!rvState.blob && !note) { st.textContent = 'Record a voice-over or type a note first.'; return; }
+  btn.disabled = true; btn.textContent = 'SENDING…';
+  try {
+    const patch = { coach_note: note || null, coach_reviewed_at: new Date().toISOString() };
+    if (rvState.blob) {
+      const ext = rvState.mime.includes('mp4') ? 'm4a' : 'webm';
+      const path = `${r.client_id}/review-${r.id}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from(FB_BUCKET).upload(path, rvState.blob, { contentType: rvState.mime.split(';')[0], upsert: false });
+      if (upErr) throw upErr;
+      patch.coach_audio_path = path;
+      patch.coach_audio_type = rvState.mime.split(';')[0] + ';rate=' + rvState.rate;
+    }
+    const { error } = await supabase.from('feedback').update(patch).eq('id', r.id);
+    if (error) throw error;
+    Object.assign(r, patch);
+    btn.textContent = '✓ SENT';
+    st.textContent = 'The player will see it under Coach Feedback.';
+    setTimeout(() => { showView('view-coach'); refreshCoachFeedback(); }, 900);
+  } catch (e) {
+    console.warn(e); btn.disabled = false; btn.textContent = 'SEND TO PLAYER'; st.textContent = 'Send failed. Check your connection and try again.';
+  }
+}
+
+
+// --- Drill library (coach) ---
+function renderLibrary() {
+  const drill = d => `<details>
+      <summary>${cgEsc(d.name)} <small>${d.minutes} min · ${d.feeder === 'tosser' ? 'Needs a tosser' : 'Solo'}</small></summary>
+      ${d.detail ? `<div class="cg-detail"><span>THE DETAIL</span>${cgEsc(d.detail)}</div>` : ''}
+      <div class="cg-row"><b>Equipment:</b> ${cgEsc(d.equip)}</div>
+      <ol>${d.steps.map(x => `<li>${cgEsc(x)}</li>`).join('')}</ol>
+      <div class="cg-row"><b>Reps:</b> ${cgEsc(d.reps)}</div>
+      <div class="cg-cue"><small>COACH CUE</small>${cgEsc(d.cue)}</div>
+      <div class="cg-row"><b>You got it when:</b> ${cgEsc(d.check)}</div>
+      <div class="cg-row"><b>Watch for:</b> ${cgEsc(d.mistake)}</div>
+      ${d.video ? `<a class="cg-video" href="${cgEsc(d.video.url)}" target="_blank" rel="noopener"><b>▶ WATCH HOW</b>${cgEsc(d.video.label)}</a>` : (d.source ? `<div class="cg-video pending">▶ Video needed (${cgEsc(d.source)})</div>` : '')}
+    </details>`;
+  document.getElementById('libBody').innerHTML = CAGE_FOCUS.map(f => {
+    const mins = f.drills.reduce((t, d) => t + d.minutes, 0);
+    return `<div class="lib-focus">
+      <h3>${cgEsc(f.name)}</h3>
+      <div class="lib-tags"><span>${f.pillar}</span>${f.series ? `<span class="ser">SERIES · ${f.drills.length} STEPS · ${mins} MIN</span>` : `<span>${f.drills.length} DRILLS · ROTATES</span>`}</div>
+      <p>${cgEsc(f.why)}</p>
+      ${((f) => f && f.intro ? `<div class="cg-intro"><b>START HERE · ${cgEsc(f.name.toUpperCase())}</b><p>${cgEsc(f.intro.text)}</p><a class="cg-video" href="${cgEsc(f.intro.url)}" target="_blank" rel="noopener"><b>▶ WATCH</b>${cgEsc(f.intro.label)}</a></div>` : '')(f)}
+      ${f.drills.map(drill).join('')}
+    </div>`;
+  }).join('') + '<div style="text-align:center"><button class="cg-back" id="libBack">◂ BACK TO COACH</button></div>';
+  document.getElementById('libBack').onclick = () => showView('view-coach');
+}
+document.getElementById('openLibrary').addEventListener('click', () => { renderLibrary(); showView('view-library'); window.scrollTo(0, 0); });
+
+
+
+// ===== SIGN-IN + FAMILY ACCESS =====
+let authEmail = null, isCoach = false, myPlayerIds = [];
+let faRows = [];
+function visibleRoster() { return isCoach ? CLIENTS : CLIENTS.filter(p => myPlayerIds.includes(p.id)); }
+async function loadAccess() {
+  const { data, error } = await supabase.from('access').select('*');
+  if (error) { console.warn('access', error); return false; }
+  const mine = (data || []).filter(r => (r.email || '').toLowerCase() === authEmail);
+  isCoach = mine.some(r => r.role === 'coach');
+  myPlayerIds = mine.map(r => r.client_id).filter(Boolean);
+  if (isCoach) faRows = data || [];
+  return isCoach || myPlayerIds.length > 0;
+}
+function renderLogin(step, email, msg) {
+  const card = document.getElementById('lgCard');
+  document.body.classList.add('locked');
+  if (step === 'code') {
+    card.innerHTML = `<h2>ENTER YOUR CODE</h2><p>We emailed a sign-in code to<br><b style="color:var(--white)">${cgEsc(email)}</b>. It can take a minute. Check spam too.</p>
+      <input class="lg-in code" id="lgCode" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="••••••">
+      <button class="fb-send" id="lgGo">SIGN IN</button>
+      <div class="fb-status" id="lgSt">${msg || ''}</div>
+      <button class="fb-skip" id="lgBack">Use a different email</button>`;
+    document.getElementById('lgBack').onclick = () => renderLogin('email');
+    document.getElementById('lgGo').onclick = async () => {
+      const token = document.getElementById('lgCode').value.replace(/\D/g, ''), st = document.getElementById('lgSt');
+      if (token.length < 6) { st.classList.add('err'); st.textContent = 'Enter the full code from the email.'; return; }
+      st.classList.remove('err'); st.textContent = 'Checking…';
+      const { error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+      if (error) { st.classList.add('err'); st.textContent = 'That code did not work. Check it, or go back and send a new one.'; return; }
+      location.reload();
+    };
+    return;
+  }
+  card.innerHTML = `<h2>SIGN IN</h2><p>This app is for Hitting 2.0 clients. Enter the email you gave Coach Devan and we'll send you a sign-in code.</p>
+    <input class="lg-in" id="lgEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" value="${cgEsc(email || '')}">
+    <button class="fb-send" id="lgSend">SEND MY CODE</button>
+    <div class="fb-status${msg ? ' err' : ''}" id="lgSt">${msg || ''}</div>`;
+  document.getElementById('lgSend').onclick = async () => {
+    const em = document.getElementById('lgEmail').value.trim().toLowerCase(), st = document.getElementById('lgSt'), btn = document.getElementById('lgSend');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { st.classList.add('err'); st.textContent = 'Enter a valid email.'; return; }
+    btn.disabled = true; st.classList.remove('err'); st.textContent = 'Checking…';
+    const { data: ok, error: chkErr } = await supabase.rpc('email_allowed', { check_email: em });
+    if (chkErr || !ok) { btn.disabled = false; st.classList.add('err'); st.textContent = 'That email is not on the Hitting 2.0 list. Ask Coach Devan to add it.'; return; }
+    const { error } = await supabase.auth.signInWithOtp({ email: em, options: { shouldCreateUser: true } });
+    btn.disabled = false;
+    if (error) { st.classList.add('err'); st.textContent = error.status === 429 ? 'Too many tries. Wait a minute and try again.' : 'Could not send the code. Try again.'; return; }
+    renderLogin('code', em);
+  };
+}
+async function signOut() {
+  await supabase.auth.signOut();
+  localStorage.removeItem(LOCAL_KEY);
+  location.reload();
+}
+
+
+// --- Coach: clients + who can sign in ---
+async function refreshAccess() {
+  const { data, error } = await supabase.from('access').select('*').order('email');
+  if (!error) faRows = data || [];
+}
+function slugify(name) {
+  const base = name.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 40) || 'client';
+  let id = base, n = 2;
+  while (CLIENTS.some(c => c.id === id)) id = base + '-' + n++;
+  return id;
+}
+function renderAccess() {
+  const list = document.getElementById('faList'); if (!list) return;
+  const sel = document.getElementById('faPlayer');
+  sel.innerHTML = '<option value="">Add an email for…</option>' + CLIENTS.map(p => `<option value="${p.id}">${cgEsc(p.name)}</option>`).join('') + '<option value="__coach">Coach (sees everything)</option>';
+  const fam = faRows.filter(r => r.role === 'client'), coaches = faRows.filter(r => r.role === 'coach');
+  const missing = CLIENTS.filter(p => !fam.some(r => r.client_id === p.id)).length;
+  document.getElementById('faSummary').textContent = `${CLIENTS.length} client${CLIENTS.length === 1 ? '' : 's'}${missing ? ' · ' + missing + ' with no email' : ''}`;
+  const chip = r => `<span class="fa-email">${cgEsc(r.email)}<button data-del="${cgEsc(r.email)}|${r.client_id || ''}" title="Remove">×</button></span>`;
+  list.innerHTML = CLIENTS.map(p => {
+    const rows = fam.filter(r => r.client_id === p.id);
+    return `<div class="fa-player"><div class="fa-name">${cgEsc(p.name)} <button class="fa-arch" data-arch="${p.id}" style="float:right;background:none;border:0;color:var(--muted);font-size:11px;letter-spacing:1px;cursor:pointer">ARCHIVE</button></div>${rows.length ? rows.map(chip).join('') : '<div class="fa-none">NO EMAIL YET: this client cannot sign in</div>'}</div>`;
+  }).join('') + `<div class="fa-player"><div class="fa-name">Coach</div>${coaches.map(chip).join('')}</div>`;
+  list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
+    const [email, pid] = b.dataset.del.split('|');
+    if (email === authEmail && !pid) { document.getElementById('faStatus').textContent = 'You cannot remove your own coach access.'; return; }
+    if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = '?'; b.style.background = 'var(--red)'; setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = '×'; b.style.background = ''; } }, 3000); return; }
+    let q = supabase.from('access').delete().eq('email', email);
+    q = pid ? q.eq('client_id', pid) : q.is('client_id', null);
+    const { error } = await q;
+    document.getElementById('faStatus').textContent = error ? 'Could not remove. Try again.' : `Removed ${email}.`;
+    await refreshAccess(); renderAccess();
+  }));
+  list.querySelectorAll('[data-arch]').forEach(b => b.addEventListener('click', async () => {
+    if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'TAP AGAIN TO ARCHIVE'; b.style.color = 'var(--red)'; setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = 'ARCHIVE'; b.style.color = ''; } }, 3000); return; }
+    const id = b.dataset.arch;
+    const { error } = await supabase.from('clients').update({ active: false }).eq('id', id);
+    if (!error) await supabase.from('access').delete().eq('client_id', id);
+    document.getElementById('faStatus').textContent = error ? 'Could not archive. Try again.' : 'Archived. Their sign-in is removed; their history is kept.';
+    await Promise.all([fetchClients(), refreshAccess()]); renderAccess(); renderCoachCagePlans();
+  }));
+}
+document.getElementById('clAdd').addEventListener('click', async () => {
+  const name = document.getElementById('clName').value.trim().replace(/\s+/g, ' ');
+  const email = document.getElementById('clEmail').value.trim().toLowerCase();
+  const st = document.getElementById('clStatus');
+  if (name.length < 2) { st.textContent = "Enter the client's name."; return; }
+  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { st.textContent = 'That email does not look right.'; return; }
+  const id = slugify(name);
+  const { error } = await supabase.from('clients').insert({ id, name });
+  if (error) { st.textContent = 'Could not add the client. Try again.'; console.warn(error); return; }
+  if (email) {
+    const { error: aErr } = await supabase.from('access').insert({ email, client_id: id, role: 'client' });
+    if (aErr) st.textContent = `Added ${name}, but the email did not save. Add it below.`;
+  }
+  if (!st.textContent.startsWith('Added')) st.textContent = email ? `Added ${name}. ${email} can sign in now.` : `Added ${name}. Add a parent email below so they can sign in.`;
+  document.getElementById('clName').value = ''; document.getElementById('clEmail').value = '';
+  await Promise.all([fetchClients(), refreshAccess()]); renderAccess(); renderCoachCagePlans();
+  setTimeout(() => { st.textContent = ''; }, 6000);
+});
+document.getElementById('faAdd').addEventListener('click', async () => {
+  const email = document.getElementById('faEmail').value.trim().toLowerCase(), pid = document.getElementById('faPlayer').value, st = document.getElementById('faStatus');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { st.textContent = 'Enter a valid email.'; return; }
+  if (!pid) { st.textContent = 'Pick the client (or Coach).'; return; }
+  const row = pid === '__coach' ? { email, client_id: null, role: 'coach' } : { email, client_id: pid, role: 'client' };
+  const { error } = await supabase.from('access').insert(row);
+  st.textContent = error ? (error.code === '23505' ? 'That email already has access for this client.' : 'Could not add. Try again.') : `Added ${email}. They can sign in now.`;
+  if (!error) document.getElementById('faEmail').value = '';
+  await refreshAccess(); renderAccess();
+});
+
+// Live updates
+function startRealtime() {
+  supabase.channel('h20-feedback').on('postgres_changes', { event: '*', schema: 'public', table: 'feedback' }, () => {
+    if (document.getElementById('view-coach').classList.contains('active')) refreshCoachFeedback();
+  }).subscribe();
+  supabase.channel('h20-plans').on('postgres_changes', { event: '*', schema: 'public', table: 'plans' }, async () => {
+    await fetchCagePlans(); updateCagePlanButton();
+    if (document.getElementById('view-coach').classList.contains('active')) renderCoachCagePlans();
+  }).subscribe();
+}
+
+// === Boot ===
+(async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) { showView('view-login'); renderLogin('email'); return; }
+  authEmail = (session.user.email || '').toLowerCase();
+  const allowed = await loadAccess();
+  if (!allowed) { await supabase.auth.signOut(); showView('view-login'); renderLogin('email', authEmail, 'That email is not on the Hitting 2.0 list anymore. Ask Coach Devan.'); return; }
+  document.body.classList.remove('locked');
+  document.querySelector('.bottom-nav button[data-view="coach"]').style.display = isCoach ? '' : 'none';
+  await Promise.all([fetchClients(), fetchCagePlans()]);
+  if (!isCoach && myPlayerIds.length === 1) { currentPlayerId = myPlayerIds[0]; localStorage.setItem(LOCAL_KEY, currentPlayerId); }
+  if (currentPlayerId && !visibleRoster().some(p => p.id === currentPlayerId)) { currentPlayerId = null; localStorage.removeItem(LOCAL_KEY); }
+  document.getElementById('playerChip').style.display = visibleRoster().length > 1 ? '' : 'none';
+  if (isCoach && !currentPlayerId) openCoachView();
+  else if (currentPlayerId) { renderHome(); showView('view-main'); }
+  else { renderPlayerSelect(); showView('view-select'); }
+  startRealtime();
+})();
+</script>
+</body>
+</html>
