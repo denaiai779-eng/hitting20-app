@@ -397,8 +397,8 @@ HTML = f"""<!DOCTYPE html>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Hitting 2.0">
 <meta name="application-name" content="Hitting 2.0">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
+<link rel="icon" href="icons/favicon.png?v=2">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Hitting 2.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
