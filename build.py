@@ -48,6 +48,9 @@ css += """
   .home-btn small { display:block; font-family:'Inter', Arial, sans-serif; font-size:11px; letter-spacing:.6px; font-weight:600; opacity:.8; margin-top:3px; text-transform:none; }
   .home-note { margin-top:14px; padding:12px 14px; border-left:3px solid var(--cyan); background: rgba(26,169,214,.08); border-radius:0 8px 8px 0; font-size:13px; line-height:1.5; }
   .home-note b { display:block; font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; color:var(--cyan); font-size:12px; margin-bottom:2px; }
+  .fa-vid { margin-top:6px; font-size:12px; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .fa-vid b { color:var(--white); }
+  .fa-vid button { background:transparent; border:1px solid #2f3640; color:var(--cyan); border-radius:4px; padding:3px 8px; font-size:10px; letter-spacing:1px; cursor:pointer; font-family:'Oswald', Impact, sans-serif; }
   .cl-add { display:grid; grid-template-columns: 1fr; gap:8px; margin:8px 0 12px; }
   .cl-add input { width:100%; padding:11px 12px; border-radius:8px; border:1px solid #2f3640; background:#0b0d10; color:var(--white); font-size:15px; font-family:'Inter', Arial, sans-serif; }
   .cp-num.ini { font-family:'Oswald', Impact, sans-serif; background: rgba(26,169,214,.15); color: var(--cyan); border-radius: 50%; width: 34px; height: 34px; display:flex; align-items:center; justify-content:center; font-size:14px; }
@@ -83,6 +86,11 @@ R = [
     ("That email is not on the Makos list. Ask Coach Devan to add it.", "That email is not on the Hitting 2.0 list. Ask Coach Devan to add it."),
     ("role === 'family'", "role === 'client'"), ("role: 'family'", "role: 'client'"),
     ("    if (repErr) console.warn('report', repErr);", "    if (repErr) throw repErr;"),
+    ("if (!fbState.file) { st.classList.add('err'); st.textContent = 'Pick a video first.'; return; }",
+     "if (!fbState.file) { st.classList.add('err'); st.textContent = 'Pick a video first.'; return; }\n  if (!isCoach) { const vs = await getVideoStatus(currentPlayerId); if (vs && vs.left <= 0) { st.classList.add('err'); st.textContent = LIMIT_MSG; return; } }"),
+    ("st.textContent = e && e.message === 'shrink'", "st.textContent = e && /VIDEO_LIMIT/.test(e.message || '') ? LIMIT_MSG : e && e.message === 'shrink'"),
+    ("onclick = () => renderVideoForm(targetEl, focus);", "onclick = () => guardVideoForm(targetEl, focus);"),
+    ("renderVideoForm(document.getElementById('cgBody'), focus); window.scrollTo(0, 0);", "guardVideoForm(document.getElementById('cgBody'), focus); window.scrollTo(0, 0);"),
     ("document.getElementById('fbSkip').addEventListener('click', () => renderCageView());", "document.getElementById('fbSkip').addEventListener('click', () => { stopAllCgTimers(); renderHome(); showView('view-main'); });"),
 ]
 for a, b in R:
@@ -176,6 +184,7 @@ function renderHome() {
   const p = clientById(currentPlayerId);
   document.getElementById('playerName').textContent = p ? p.name : 'Pick a client';
   updateCagePlanButton();
+  renderVideoCounter();
 }
 function renderHomeNote() {
   const el = document.getElementById('homeNote'); if (!el) return;
@@ -185,19 +194,46 @@ function renderHomeNote() {
 document.getElementById('rosterGrid').addEventListener('click', e => { const c = e.target.closest('.ps-card'); if (c) setPlayer(c.dataset.id); });
 document.getElementById('playerChip').addEventListener('click', () => { renderPlayerSelect(); showView('view-select'); });
 document.getElementById('cagePlanBtn').addEventListener('click', openCageView);
+const LIMIT_MSG = "You've used all your videos for this month. They reset on the 1st. Extra breakdowns are $25: text Coach Devan at 313-478-3086.";
+async function getVideoStatus(cid) {
+  const { data, error } = await supabase.rpc('video_status', { cid });
+  if (error) { console.warn('video_status', error); return null; }
+  return data;
+}
+async function guardVideoForm(targetEl, focus) {
+  if (!isCoach) {
+    const vs = await getVideoStatus(currentPlayerId);
+    if (vs && vs.allowed <= 0) { targetEl.innerHTML = `<div class="cg-empty"><b>VIDEO BREAKDOWNS</b>Video breakdowns come with the Hitting 2.0 App add-on or the Remote membership. Ask Coach Devan to add it.<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`; document.getElementById('vgBack').onclick = () => { renderHome(); showView('view-main'); }; return; }
+    if (vs && vs.left <= 0) { targetEl.innerHTML = `<div class="cg-empty"><b>${vs.used} OF ${vs.allowed} USED</b>${LIMIT_MSG}<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`; document.getElementById('vgBack').onclick = () => { renderHome(); showView('view-main'); }; return; }
+  }
+  renderVideoForm(targetEl, focus);
+  if (!isCoach) {
+    const vs = await getVideoStatus(currentPlayerId);
+    const sub = targetEl.querySelector('.fb-sub');
+    if (vs && sub) sub.innerHTML = `<b style="color:var(--cyan)">${vs.left} of ${vs.allowed} videos left this month.</b> Up to 2 minutes each. Coach talks over it.`;
+  }
+}
+async function renderVideoCounter() {
+  const el = document.getElementById('homeVideoSub'); if (!el || !currentPlayerId) return;
+  if (isCoach) { el.textContent = 'Up to 2 minutes. Coach talks over it.'; return; }
+  const vs = await getVideoStatus(currentPlayerId);
+  if (!vs) return;
+  el.textContent = vs.allowed <= 0 ? 'Comes with the App add-on or Remote membership'
+    : vs.left <= 0 ? `All ${vs.allowed} used this month · resets on the 1st` : `${vs.left} of ${vs.allowed} left this month`;
+}
 document.getElementById('homeVideo').addEventListener('click', () => {
   if (!currentPlayerId) return;
   showView('view-cage'); window.scrollTo(0, 0);
   const p = clientById(currentPlayerId);
   document.getElementById('cgPlayer').textContent = p ? p.name : '';
   document.getElementById('cgChips').innerHTML = '';
-  renderVideoForm(document.getElementById('cgBody'), cagePlans[currentPlayerId]?.focus || []);
+  guardVideoForm(document.getElementById('cgBody'), cagePlans[currentPlayerId]?.focus || []);
 });
 document.getElementById('homeFeedback').addEventListener('click', () => { if (currentPlayerId) openMyFeedback(); });
 
 async function openCoachView() {
   showView('view-coach'); window.scrollTo(0, 0);
-  await Promise.all([fetchClients(), fetchCagePlans(), fetchCageStats(), refreshAccess()]);
+  await Promise.all([fetchClients(), fetchCagePlans(), fetchCageStats(), refreshAccess(), refreshUsage()]);
   fbRows = await fetchFeedback();
   renderCoachCagePlans(); renderCoachFeedback(); renderAccess();
 }
@@ -211,6 +247,15 @@ document.getElementById('lockCoach').addEventListener('click', () => signOut());
 __LIFTED__
 
 // --- Coach: clients + who can sign in ---
+const monthKey = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Detroit' }).slice(0, 7);
+let usageByClient = {};
+async function refreshUsage() {
+  const start = monthKey() + '-01T00:00:00-05:00';
+  const { data, error } = await supabase.from('video_usage').select('client_id').gte('created_at', start).limit(5000);
+  if (error) { console.warn('usage', error); return; }
+  usageByClient = {};
+  for (const r of data || []) usageByClient[r.client_id] = (usageByClient[r.client_id] || 0) + 1;
+}
 async function refreshAccess() {
   const { data, error } = await supabase.from('access').select('*').order('email');
   if (!error) faRows = data || [];
@@ -231,7 +276,11 @@ function renderAccess() {
   const chip = r => `<span class="fa-email">${cgEsc(r.email)}<button data-del="${cgEsc(r.email)}|${r.client_id || ''}" title="Remove">×</button></span>`;
   list.innerHTML = CLIENTS.map(p => {
     const rows = fam.filter(r => r.client_id === p.id);
-    return `<div class="fa-player"><div class="fa-name">${cgEsc(p.name)} <button class="fa-arch" data-arch="${p.id}" style="float:right;background:none;border:0;color:var(--muted);font-size:11px;letter-spacing:1px;cursor:pointer">ARCHIVE</button><button data-ren="${p.id}" style="float:right;background:none;border:0;color:var(--cyan);font-size:11px;letter-spacing:1px;cursor:pointer;margin-right:10px">RENAME</button></div>${rows.length ? rows.map(chip).join('') : '<div class="fa-none">NO EMAIL YET: this client cannot sign in</div>'}</div>`;
+    const vAllowed = (p.video_limit || 0) + (p.bonus_month === monthKey() ? (p.bonus_videos || 0) : 0), vUsed = usageByClient[p.id] || 0;
+    return `<div class="fa-player"><div class="fa-name">${cgEsc(p.name)} <button class="fa-arch" data-arch="${p.id}" style="float:right;background:none;border:0;color:var(--muted);font-size:11px;letter-spacing:1px;cursor:pointer">ARCHIVE</button><button data-ren="${p.id}" style="float:right;background:none;border:0;color:var(--cyan);font-size:11px;letter-spacing:1px;cursor:pointer;margin-right:10px">RENAME</button></div>${rows.length ? rows.map(chip).join('') : '<div class="fa-none">NO EMAIL YET: this client cannot sign in</div>'}
+      <div class="fa-vid">🎬 Videos this month: <b>${vUsed} of ${vAllowed}</b>
+        <button data-vlim="${p.id}" data-to="${p.video_limit > 0 ? 0 : 2}">${p.video_limit > 0 ? 'TURN OFF' : 'TURN ON 2/MO'}</button>
+        <button data-vbonus="${p.id}">+1 EXTRA</button></div></div>`;
   }).join('') + `<div class="fa-player"><div class="fa-name">Coach</div>${coaches.map(chip).join('')}</div>`;
   list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
     const [email, pid] = b.dataset.del.split('|');
@@ -242,6 +291,18 @@ function renderAccess() {
     const { error } = await q;
     document.getElementById('faStatus').textContent = error ? 'Could not remove. Try again.' : `Removed ${email}.`;
     await refreshAccess(); renderAccess();
+  }));
+  list.querySelectorAll('[data-vlim]').forEach(b => b.addEventListener('click', async () => {
+    const { error } = await supabase.from('clients').update({ video_limit: Number(b.dataset.to) }).eq('id', b.dataset.vlim);
+    document.getElementById('faStatus').textContent = error ? 'Could not change videos. Try again.' : (Number(b.dataset.to) > 0 ? 'Videos turned on: 2 a month.' : 'Videos turned off.');
+    await refreshUsage(); await fetchClients(); renderAccess();
+  }));
+  list.querySelectorAll('[data-vbonus]').forEach(b => b.addEventListener('click', async () => {
+    const c = clientById(b.dataset.vbonus); if (!c) return;
+    const bonus = (c.bonus_month === monthKey() ? (c.bonus_videos || 0) : 0) + 1;
+    const { error } = await supabase.from('clients').update({ bonus_videos: bonus, bonus_month: monthKey() }).eq('id', c.id);
+    document.getElementById('faStatus').textContent = error ? 'Could not add the extra video. Try again.' : `Added 1 extra video for ${c.name} this month.`;
+    await fetchClients(); renderAccess();
   }));
   list.querySelectorAll('[data-ren]').forEach(b => b.addEventListener('click', async () => {
     const c = clientById(b.dataset.ren); if (!c) return;
@@ -371,7 +432,7 @@ HTML = f"""<!DOCTYPE html>
   <div class="home-wrap">
     <button class="home-btn primary" id="cagePlanBtn">⚾ MY CAGE PLAN<small id="cagePlanSub">Your session from Coach Devan</small></button>
     <div id="homeNote"></div>
-    <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small>Up to 2 minutes. Coach talks over it.</small></button>
+    <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></button>
     <button class="home-btn" id="homeFeedback">💬 COACH FEEDBACK<small>Voice-overs and notes on your videos</small></button>
     <footer class="h20-foot">HITTING 2.0 · COACH DEVAN AHART</footer>
   </div>
