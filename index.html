@@ -1532,7 +1532,7 @@
   </div>
   <div class="coach-section">
     <div class="coach-section-head"><h3>Sign-In Access</h3><div class="cp-last" id="faSummary"></div></div>
-    <div class="cp-hint" style="text-align:left">Only these emails can sign in. Archive a client when they stop training.</div>
+    <div class="cp-hint" style="text-align:left">Only these emails can sign in. Archive keeps their history; Delete removes them for good.</div>
     <div class="fa-add">
       <input type="email" id="faEmail" placeholder="parent@email.com" autocomplete="off">
       <select id="faPlayer"></select>
@@ -1597,7 +1597,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Auto-update: phones cache this page, so check for a newer version on open and when the app comes back on screen.
-const APP_VERSION = '20261004172119';
+const APP_VERSION = '20261004172625';
 async function checkForUpdate() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -2473,7 +2473,7 @@ function renderAccess() {
   list.innerHTML = CLIENTS.map(p => {
     const rows = fam.filter(r => r.client_id === p.id);
     const vAllowed = (p.video_limit || 0) + (p.bonus_month === monthKey() ? (p.bonus_videos || 0) : 0), vUsed = usageByClient[p.id] || 0;
-    return `<div class="fa-player"><div class="fa-name">${cgEsc(p.name)} <button class="fa-arch" data-arch="${p.id}" style="float:right;background:none;border:0;color:var(--muted);font-size:11px;letter-spacing:1px;cursor:pointer">ARCHIVE</button><button data-ren="${p.id}" style="float:right;background:none;border:0;color:var(--cyan);font-size:11px;letter-spacing:1px;cursor:pointer;margin-right:10px">RENAME</button></div>${rows.length ? rows.map(chip).join('') : '<div class="fa-none">NO EMAIL YET: this client cannot sign in</div>'}
+    return `<div class="fa-player"><div class="fa-name">${cgEsc(p.name)} <button class="fa-arch" data-arch="${p.id}" style="float:right;background:none;border:0;color:var(--muted);font-size:11px;letter-spacing:1px;cursor:pointer">ARCHIVE</button><button data-delc="${p.id}" style="float:right;background:none;border:0;color:#ff6b78;font-size:11px;letter-spacing:1px;cursor:pointer;margin-left:10px">DELETE</button><button data-ren="${p.id}" style="float:right;background:none;border:0;color:var(--cyan);font-size:11px;letter-spacing:1px;cursor:pointer;margin-right:10px">RENAME</button></div>${rows.length ? rows.map(chip).join('') : '<div class="fa-none">NO EMAIL YET: this client cannot sign in</div>'}
       <div class="fa-vid">🎬 Videos this month: <b>${vUsed} of ${vAllowed}</b>
         <button data-vlim="${p.id}" data-to="${p.video_limit > 0 ? 0 : 2}">${p.video_limit > 0 ? 'TURN OFF' : 'TURN ON 2/MO'}</button>
         <button data-vbonus="${p.id}">+1 EXTRA</button></div></div>`;
@@ -2499,6 +2499,22 @@ function renderAccess() {
     const { error } = await supabase.from('clients').update({ bonus_videos: bonus, bonus_month: monthKey() }).eq('id', c.id);
     document.getElementById('faStatus').textContent = error ? 'Could not add the extra video. Try again.' : `Added 1 extra video for ${c.name} this month.`;
     await fetchClients(); renderAccess();
+  }));
+  list.querySelectorAll('[data-delc]').forEach(b => b.addEventListener('click', async () => {
+    const c = clientById(b.dataset.delc); if (!c) return;
+    if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'TAP AGAIN: DELETE FOREVER'; b.style.fontWeight = '800'; setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = 'DELETE'; b.style.fontWeight = ''; } }, 4000); return; }
+    b.disabled = true; b.textContent = 'DELETING…';
+    const st = document.getElementById('faStatus');
+    try {
+      const { data: files } = await supabase.storage.from(FB_BUCKET).list(c.id, { limit: 1000 });
+      const paths = (files || []).map(f => `${c.id}/${f.name}`);
+      if (paths.length) { const { error: sErr } = await supabase.storage.from(FB_BUCKET).remove(paths); if (sErr) throw sErr; }
+      const { error } = await supabase.from('clients').delete().eq('id', c.id);
+      if (error) throw error;
+      st.textContent = `Deleted ${c.name}: sign-in, plan, reports and videos removed.`;
+    } catch (e) { console.warn(e); st.textContent = `Could not delete ${c.name}. Try again.`; }
+    if (currentPlayerId === c.id) { currentPlayerId = null; localStorage.removeItem(LOCAL_KEY); }
+    await Promise.all([fetchClients(), refreshAccess(), refreshUsage(), fetchCagePlans()]); renderAccess(); renderCoachCagePlans();
   }));
   list.querySelectorAll('[data-ren]').forEach(b => b.addEventListener('click', async () => {
     const c = clientById(b.dataset.ren); if (!c) return;
