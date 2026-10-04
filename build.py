@@ -231,7 +231,7 @@ function renderAccess() {
   const chip = r => `<span class="fa-email">${cgEsc(r.email)}<button data-del="${cgEsc(r.email)}|${r.client_id || ''}" title="Remove">×</button></span>`;
   list.innerHTML = CLIENTS.map(p => {
     const rows = fam.filter(r => r.client_id === p.id);
-    return `<div class="fa-player"><div class="fa-name">${cgEsc(p.name)} <button class="fa-arch" data-arch="${p.id}" style="float:right;background:none;border:0;color:var(--muted);font-size:11px;letter-spacing:1px;cursor:pointer">ARCHIVE</button></div>${rows.length ? rows.map(chip).join('') : '<div class="fa-none">NO EMAIL YET: this client cannot sign in</div>'}</div>`;
+    return `<div class="fa-player"><div class="fa-name">${cgEsc(p.name)} <button class="fa-arch" data-arch="${p.id}" style="float:right;background:none;border:0;color:var(--muted);font-size:11px;letter-spacing:1px;cursor:pointer">ARCHIVE</button><button data-ren="${p.id}" style="float:right;background:none;border:0;color:var(--cyan);font-size:11px;letter-spacing:1px;cursor:pointer;margin-right:10px">RENAME</button></div>${rows.length ? rows.map(chip).join('') : '<div class="fa-none">NO EMAIL YET: this client cannot sign in</div>'}</div>`;
   }).join('') + `<div class="fa-player"><div class="fa-name">Coach</div>${coaches.map(chip).join('')}</div>`;
   list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
     const [email, pid] = b.dataset.del.split('|');
@@ -242,6 +242,14 @@ function renderAccess() {
     const { error } = await q;
     document.getElementById('faStatus').textContent = error ? 'Could not remove. Try again.' : `Removed ${email}.`;
     await refreshAccess(); renderAccess();
+  }));
+  list.querySelectorAll('[data-ren]').forEach(b => b.addEventListener('click', async () => {
+    const c = clientById(b.dataset.ren); if (!c) return;
+    const name = (window.prompt("Hitter's name", c.name) || '').trim().replace(/\s+/g, ' ');
+    if (!name || name === c.name) return;
+    const { error } = await supabase.from('clients').update({ name }).eq('id', c.id);
+    document.getElementById('faStatus').textContent = error ? 'Could not rename. Try again.' : `Renamed to ${name}.`;
+    await fetchClients(); renderAccess(); renderCoachCagePlans();
   }));
   list.querySelectorAll('[data-arch]').forEach(b => b.addEventListener('click', async () => {
     if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'TAP AGAIN TO ARCHIVE'; b.style.color = 'var(--red)'; setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = 'ARCHIVE'; b.style.color = ''; } }, 3000); return; }
