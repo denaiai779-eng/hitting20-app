@@ -100,6 +100,4 @@ create policy "videos delete" on storage.objects for delete to authenticated
 -- Live updates for the coach screen
 alter publication supabase_realtime add table public.feedback, public.plans;
 
--- The coach
-insert into public.access (email, client_id, role) values ('hitting2.0bball@gmail.com', null, 'coach'), ('devanahart@icloud.com', null, 'coach')
-on conflict do nothing;
+-- The coach: add coach emails directly in the database (kept out of this public file).
