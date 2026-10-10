@@ -1597,7 +1597,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Auto-update: phones cache this page, so check for a newer version on open and when the app comes back on screen.
-const APP_VERSION = '20261004172625';
+const APP_VERSION = '20261010074243';
 async function checkForUpdate() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -1811,7 +1811,7 @@ async function saveCagePlan(clear) {
   if (!cpEditing) return;
   if (!clear && !cpSelected.length) { alertCp('Pick at least 1 focus area'); return; }
   const row = { client_id: cpEditing, focus: clear ? [] : cpSelected,
-    note: clear ? null : (document.getElementById('cpNote').value.trim() || null), assigned_by: 'coach', updated_at: new Date().toISOString() };
+    note: clear ? null : (document.getElementById('cpNote').value.trim() || null), updated_at: new Date().toISOString() };
   const btn = document.getElementById('cpSave'); btn.disabled = true; btn.textContent = 'SAVING…';
   const { error } = await supabase.from('plans').upsert(row, { onConflict: 'client_id' });
   btn.disabled = false; btn.textContent = 'SAVE';

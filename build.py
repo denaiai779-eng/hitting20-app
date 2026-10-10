@@ -84,7 +84,9 @@ R = [
     ("This app is for Midwest Makos families and coaches only. Enter the email you gave the team and we'll send you a sign-in code.",
      "This app is for Hitting 2.0 clients. Enter the email you gave Coach Devan and we'll send you a sign-in code."),
     ("That email is not on the Makos list. Ask Coach Devan to add it.", "That email is not on the Hitting 2.0 list. Ask Coach Devan to add it."),
-    ("role === 'family'", "role === 'client'"), ("role: 'family'", "role: 'client'"),
+    ("role === 'family'", "role === 'client'"),
+    # the plans table has no assigned_by column: sending it made every plan save fail
+    (", assigned_by: 'coach', updated_at", ", updated_at"), ("role: 'family'", "role: 'client'"),
     ("    if (repErr) console.warn('report', repErr);", "    if (repErr) throw repErr;"),
     ("if (!fbState.file) { st.classList.add('err'); st.textContent = 'Pick a video first.'; return; }",
      "if (!fbState.file) { st.classList.add('err'); st.textContent = 'Pick a video first.'; return; }\n  if (!isCoach) { const vs = await getVideoStatus(currentPlayerId); if (vs && vs.left <= 0) { st.classList.add('err'); st.textContent = LIMIT_MSG; return; } }"),
