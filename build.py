@@ -86,7 +86,13 @@ R = [
     ("That email is not on the Makos list. Ask Coach Devan to add it.", "That email is not on the Hitting 2.0 list. Ask Coach Devan to add it."),
     ("role === 'family'", "role === 'client'"),
     # the plans table has no assigned_by column: sending it made every plan save fail
-    (", assigned_by: 'coach', updated_at", ", updated_at"), ("role: 'family'", "role: 'client'"),
+    (", assigned_by: 'coach', updated_at", ", updated_at"),
+    # Hitting 2.0 is hitting only: drop the Makos HQ HITTING/PITCHING side tabs and library headings
+    ("  document.getElementById('cpOpts').innerHTML = `<div class=\"side-tabs\"><button class=\"side-tab ${cpSide === 'hitting' ? 'on' : ''}\" data-side=\"hitting\">⚾ HITTING</button><button class=\"side-tab ${cpSide === 'pitching' ? 'on' : ''}\" data-side=\"pitching\">🎯 PITCHING</button></div>` + CAGE_FOCUS.filter(f => f.side === cpSide).map(f =>",
+     "  document.getElementById('cpOpts').innerHTML = CAGE_FOCUS.map(f =>"),
+    ("  cpSide = planSide(cpSelected);\n", ""),
+    ("    const sideHead = (i === 0 || arr[i - 1].side !== f.side) ? `<h2 class=\"side-head\">${f.side === 'pitching' ? '🎯 PITCHING SIDE <small>Draft: Coach Duncan to review</small>' : '⚾ HITTING SIDE'}</h2>` : '';\n", ""),
+    ("    return sideHead + `<div class=\"lib-focus\">", "    return `<div class=\"lib-focus\">"), ("role: 'family'", "role: 'client'"),
     ("    if (repErr) console.warn('report', repErr);", "    if (repErr) throw repErr;"),
     ("if (!fbState.file) { st.classList.add('err'); st.textContent = 'Pick a video first.'; return; }",
      "if (!fbState.file) { st.classList.add('err'); st.textContent = 'Pick a video first.'; return; }\n  if (!isCoach) { const vs = await getVideoStatus(currentPlayerId); if (vs && vs.left <= 0) { st.classList.add('err'); st.textContent = LIMIT_MSG; return; } }"),
@@ -96,6 +102,8 @@ R = [
     ("document.getElementById('fbSkip').addEventListener('click', () => renderCageView());", "document.getElementById('fbSkip').addEventListener('click', () => { stopAllCgTimers(); renderHome(); showView('view-main'); });"),
 ]
 for a, b in R:
+    if 'side-tab' in a or 'sideHead' in a or 'planSide' in a:
+        assert a in js, 'H2.0 side strip missed: ' + a[:50]
     js = js.replace(a, b)
 
 # session count now comes from session reports, not the points log
@@ -401,7 +409,7 @@ function startRealtime() {
 app_js = APP_JS.replace('__URL__', SUPABASE_URL).replace('__KEY__', ANON).replace('__VERSION__', VERSION).replace('__LIFTED__', js)
 
 # Leftovers from the Makos engine that must not survive
-for bad in ['TEAM_ID', 'ROSTER', 'divLogo', 'allPlayersData', 'getMonday', "'log'", 'Makos', 'MAKO', 'Nick', 'fetchPlayers']:
+for bad in ['planSide(', 'side-head', 'TEAM_ID', 'ROSTER', 'divLogo', 'allPlayersData', 'getMonday', "'log'", 'Makos', 'MAKO', 'Nick', 'fetchPlayers']:
     assert bad not in app_js, f'leftover: {bad}'
 
 HTML = f"""<!DOCTYPE html>
