@@ -204,7 +204,7 @@ function renderHomeNote() {
 document.getElementById('rosterGrid').addEventListener('click', e => { const c = e.target.closest('.ps-card'); if (c) setPlayer(c.dataset.id); });
 document.getElementById('playerChip').addEventListener('click', () => { renderPlayerSelect(); showView('view-select'); });
 document.getElementById('cagePlanBtn').addEventListener('click', openCageView);
-const LIMIT_MSG = "You've used all your videos for this month. They reset on the 1st. Extra breakdowns are $25: text Coach Devan at 313-478-3086.";
+const LIMIT_MSG = "You've used all your videos for this month. They reset on the 1st. Extra breakdowns are $26: text Coach Devan at 313-478-3086.";
 async function getVideoStatus(cid) {
   const { data, error } = await supabase.rpc('video_status', { cid });
   if (error) { console.warn('video_status', error); return null; }
