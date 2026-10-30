@@ -101,6 +101,9 @@ R = [
     ("renderVideoForm(document.getElementById('cgBody'), focus); window.scrollTo(0, 0);", "guardVideoForm(document.getElementById('cgBody'), focus); window.scrollTo(0, 0);"),
     ("document.getElementById('fbSkip').addEventListener('click', () => renderCageView());", "document.getElementById('fbSkip').addEventListener('click', () => { stopAllCgTimers(); renderHome(); showView('view-main'); });"),
 ]
+# Hitting 2.0 has no points game: swap the Makos prep-points block for stubs
+js = re.sub(r"// ===== PREP POINTS .*?// ===== END PREP POINTS =====\n", "function prepPointsBtn() { return ''; }\nfunction wirePrepPoints() {}\n", js, count=1, flags=re.S)
+assert 'claimPrepPoints' not in js, 'H2.0 prep-points strip missed'
 for a, b in R:
     if 'side-tab' in a or 'sideHead' in a or 'planSide' in a:
         assert a in js, 'H2.0 side strip missed: ' + a[:50]

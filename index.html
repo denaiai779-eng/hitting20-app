@@ -1369,6 +1369,9 @@
   .cg-hw { border-left-color:var(--gold); }
   .cg-hw-btns { display:flex; gap:8px; margin-top:8px; }
   .cg-hw-btns .lib-btn { margin:0; flex:1; width:auto; font-size:13px; padding:9px 6px; }
+  .cg-prep-pts { display:block; width:100%; margin-top:8px; padding:11px; border-radius:8px; border:0; background:var(--gold); color:#0b0d10; font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; font-size:16px; cursor:pointer; }
+  .cg-prep-pts.on { background:var(--green); }
+  .cg-prep-pts:disabled { cursor:default; }
   .mp-li-vid { color:var(--cyan); font-weight:700; font-size:11px; letter-spacing:1px; text-decoration:none; white-space:nowrap; }
   .mp-vid { width:100%; border-radius:8px; margin:10px 0 4px; background:#000; }
   .side-head { font-family:'Oswald', Impact, sans-serif; letter-spacing:3px; color: var(--cyan); font-size:22px; margin:22px 0 4px; border-bottom:1px solid rgba(26,169,214,.35); padding-bottom:6px; }
@@ -1617,7 +1620,7 @@
 </nav>
 
 <script src="cage-library.js"></script>
-<script src="movement-prep.js?v=20261029223143"></script>
+<script src="movement-prep.js?v=20261029223705"></script>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
@@ -1626,7 +1629,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Auto-update: phones cache this page, so check for a newer version on open and when the app comes back on screen.
-const APP_VERSION = '20261029223143';
+const APP_VERSION = '20261029223705';
 async function checkForUpdate() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -1899,7 +1902,7 @@ function renderCageView() {
   cgState = { steps, done: new Set(), timers: {}, bench: {}, session };
   const note = (plan.note ? `<div class="cg-note"><b>FROM COACH</b>${cgEsc(plan.note)}</div>` : '')
     + `<div class="cg-note cg-goal"><b>TODAY'S GOAL</b>${cgEsc(focus.map(focusName).join(' + '))}<small>Movement prep, then balance &amp; core, then baseball drills. Every step builds to the goal.</small></div>`
-    + (window.MOVEMENT_PREP ? `<div class="cg-note cg-hw"><b>BEFORE YOU COME IN</b>Do the full routines at home or before your session. In the cage you'll run the quick versions.<div class="cg-hw-btns"><button class="lib-btn" data-hw="prep">🤸 FULL MOVEMENT PREP</button><button class="lib-btn" data-hw="balance">⚖️ FULL BALANCE</button></div></div>` : '');
+    + (window.MOVEMENT_PREP ? `<div class="cg-note cg-hw"><b>BEFORE YOU COME IN</b>Do the full routines at home or before your session. In the cage you'll run the quick versions.<div class="cg-hw-btns"><button class="lib-btn" data-hw="prep">🤸 FULL MOVEMENT PREP</button><button class="lib-btn" data-hw="balance">⚖️ FULL BALANCE</button></div>${prepPointsBtn()}</div>` : '');
   body.innerHTML = note + `
     <div class="cg-progress"><div id="cgBar"></div></div>
     <div class="cg-progress-label" id="cgProgLabel">0 / ${steps.length} done · session #${sessionNo + 1} · about ${steps.reduce((t, x) => t + x.minutes, 0)} min</div>
@@ -1934,6 +1937,7 @@ function renderCageView() {
     <div style="display:flex;gap:8px;margin-top:14px"><button class="lib-btn" id="cgMyFb" style="margin:0;flex:1">💬 COACH FEEDBACK</button><button class="lib-btn" id="cgSendVid" style="margin:0;flex:1">📹 SEND A VIDEO</button></div>
     <div style="text-align:center"><button class="cg-back" id="cgBack">◂ BACK</button></div>`;
   document.getElementById('cgMyFb').onclick = openMyFeedback;
+  wirePrepPoints(body);
   body.querySelectorAll('[data-hw]').forEach(b => b.addEventListener('click', () => { stopAllCgTimers(); openMovement(b.dataset.hw, 'view-cage'); }));
   document.getElementById('cgSendVid').onclick = () => { stopAllCgTimers(); guardVideoForm(document.getElementById('cgBody'), focus); window.scrollTo(0, 0); };
   body.querySelectorAll('[data-inc],[data-dec]').forEach(b => b.addEventListener('click', () => {
@@ -2422,6 +2426,9 @@ function renderLibrary() {
   document.getElementById('libBack').onclick = () => showView('view-coach');
 }
 document.getElementById('openLibrary').addEventListener('click', () => { renderLibrary(); showView('view-library'); window.scrollTo(0, 0); });
+
+function prepPointsBtn() { return ''; }
+function wirePrepPoints() {}
 
 // ===== MOVEMENT PREP =====
 // Content lives in movement-prep.js (shared with Hitting 2.0). A move with no video shows "Video coming".
