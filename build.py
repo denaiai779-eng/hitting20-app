@@ -461,6 +461,7 @@ HTML = f"""<!DOCTYPE html>
     <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></button>
     <button class="home-btn" id="homeFeedback">💬 COACH FEEDBACK<small>Voice-overs and notes on your videos</small></button>
     <button class="home-btn" id="movementBtn">🤸 MOVEMENT PREP<small>Warm-ups and arm care by age group</small></button>
+    <button class="home-btn" id="balanceBtn">⚖️ BALANCE &amp; STABILITY<small>Own your base: balance and core by age group</small></button>
     <footer class="h20-foot">HITTING 2.0 · COACH DEVAN AHART</footer>
   </div>
 </div>
@@ -517,7 +518,7 @@ HTML = f"""<!DOCTYPE html>
   <div class="cg-wrap" id="libBody"></div>
 </div>
 <div class="view" id="view-movement">
-  <div class="lb-header"><h2>MOVEMENT PREP</h2><div class="sub">Warm up right. Pick your age group.</div></div>
+  <div class="lb-header"><h2 id="mpTitle">MOVEMENT PREP</h2><div class="sub" id="mpSub">Warm up right. Pick your age group.</div></div>
   <div class="cg-wrap" id="mpBody"></div>
 </div>
 <div class="view" id="view-review">
