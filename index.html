@@ -1351,6 +1351,19 @@
   .cp-sheet .sheet-content { border-top-color:rgba(26,169,214,.6); }
   .cp-sheet .sheet-title { color:var(--cyan); }
   .cp-opts { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 12px; }
+  .side-tabs { grid-column: 1 / -1; display:flex; gap:8px; margin-bottom:6px; }
+  .side-tab { flex:1; padding:10px 8px; border-radius:8px; border:1px solid rgba(26,169,214,.35); background:transparent; color:var(--muted); font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; font-size:15px; cursor:pointer; }
+  .side-tab.on { background: var(--cyan); color:#0b0d10; border-color: var(--cyan); }
+  .mp-btn { background:transparent !important; border:1px solid rgba(26,169,214,.5) !important; color:var(--cyan) !important; }
+  .mp-tabs { margin:14px 0 4px; }
+  .mp-note { margin:10px 0 4px; font-size:13px; line-height:1.5; color:var(--ink); }
+  .mp-credit { margin-top:10px; text-align:center; font-size:11px; letter-spacing:1.5px; font-weight:700; color:var(--cyan); text-transform:uppercase; }
+  .mp-phase { margin-top:10px; }
+  .mp-ph-head { font-family:'Oswald', Impact, sans-serif; letter-spacing:2px; font-size:16px; color:var(--cyan); padding-top:8px; border-top:1px solid rgba(26,169,214,.25); }
+  .mp-ph-head small { display:block; font-family:'Inter', Arial, sans-serif; letter-spacing:.3px; font-size:11px; color:var(--muted); text-transform:none; margin-bottom:2px; }
+  .mp-vid { width:100%; border-radius:8px; margin:10px 0 4px; background:#000; }
+  .side-head { font-family:'Oswald', Impact, sans-serif; letter-spacing:3px; color: var(--cyan); font-size:22px; margin:22px 0 4px; border-bottom:1px solid rgba(26,169,214,.35); padding-bottom:6px; }
+  .side-head small { display:block; font-family:'Inter', Arial, sans-serif; font-size:11px; letter-spacing:.5px; color: var(--muted); }
   .cp-opt { text-align:left; padding:10px; border-radius:8px; border:1px solid rgba(26,169,214,.25); background:rgba(21,25,30,.6); color:var(--ink); cursor:pointer; font-size:13px; font-weight:700; }
   .cp-opt small { display:block; font-size:9px; letter-spacing:1.5px; color:var(--muted); font-weight:700; margin-top:2px; }
   .cp-opt.on { background:linear-gradient(135deg, var(--cyan), var(--cyan-deep)); color:var(--navy-1); border-color:var(--cyan); }
@@ -1499,6 +1512,7 @@
     <div id="homeNote"></div>
     <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></button>
     <button class="home-btn" id="homeFeedback">💬 COACH FEEDBACK<small>Voice-overs and notes on your videos</small></button>
+    <button class="home-btn" id="movementBtn">🤸 MOVEMENT PREP<small>Warm-ups and arm care by age group</small></button>
     <footer class="h20-foot">HITTING 2.0 · COACH DEVAN AHART</footer>
   </div>
 </div>
@@ -1554,6 +1568,10 @@
   <div class="lb-header"><h2>DRILL LIBRARY</h2><div class="sub">Every series and drill a client can be assigned</div></div>
   <div class="cg-wrap" id="libBody"></div>
 </div>
+<div class="view" id="view-movement">
+  <div class="lb-header"><h2>MOVEMENT PREP</h2><div class="sub">Warm up right. Pick your age group.</div></div>
+  <div class="cg-wrap" id="mpBody"></div>
+</div>
 <div class="view" id="view-review">
   <div class="lb-header"><h2>REVIEW</h2><div class="sub" id="rvPlayer">—</div></div>
   <div class="cg-wrap" id="rvBody"></div>
@@ -1589,6 +1607,7 @@
 </nav>
 
 <script src="cage-library.js"></script>
+<script src="movement-prep.js?v=20261029220013"></script>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
@@ -1597,7 +1616,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Auto-update: phones cache this page, so check for a newer version on open and when the app comes back on screen.
-const APP_VERSION = '20261025124208';
+const APP_VERSION = '20261029220013';
 async function checkForUpdate() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -1772,6 +1791,7 @@ function masteryBadges(playerId, focus) {
   }
   return out.length ? `<div class="cp-star">${out.join('<br>')}</div>` : '';
 }
+let cpSide = 'hitting';
 function renderCpOpts() {
   document.getElementById('cpOpts').innerHTML = CAGE_FOCUS.map(f =>
     `<button class="cp-opt ${cpSelected.includes(f.id) ? 'on' : ''}" data-fid="${f.id}">${cgEsc(f.name)}${f.series ? '<span class="ser">SERIES</span>' : ''}<small>${f.pillar}</small></button>`).join('');
@@ -1789,6 +1809,11 @@ function renderCpOpts() {
     else if (cpSelected.length < 3) cpSelected.push(id);
     else { alertCp('Max 3 focus areas'); return; }
     renderCpOpts();
+  }));
+  document.querySelectorAll('#cpOpts .side-tab').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.side === cpSide) return;
+    if (cpSelected.length) alertCp('Switched sides: picks cleared. A plan is all hitting or all pitching.');
+    cpSide = b.dataset.side; cpSelected = []; renderCpOpts();
   }));
 }
 function alertCp(msg) {
@@ -2370,7 +2395,7 @@ function renderLibrary() {
       <div class="cg-row"><b>Watch for:</b> ${cgEsc(d.mistake)}</div>
       ${d.video ? `<a class="cg-video" href="${cgEsc(d.video.url)}" target="_blank" rel="noopener"><b>▶ WATCH HOW</b>${cgEsc(d.video.label)}</a>` : (d.source ? `<div class="cg-video pending">▶ Video needed (${cgEsc(d.source)})</div>` : '')}
     </details>`;
-  document.getElementById('libBody').innerHTML = CAGE_FOCUS.map(f => {
+  document.getElementById('libBody').innerHTML = CAGE_FOCUS.map((f, i, arr) => {
     const mins = f.drills.reduce((t, d) => t + d.minutes, 0);
     return `<div class="lib-focus">
       <h3>${cgEsc(f.name)}</h3>
@@ -2383,6 +2408,44 @@ function renderLibrary() {
   document.getElementById('libBack').onclick = () => showView('view-coach');
 }
 document.getElementById('openLibrary').addEventListener('click', () => { renderLibrary(); showView('view-library'); window.scrollTo(0, 0); });
+
+// ===== MOVEMENT PREP =====
+// Content lives in movement-prep.js (shared with Hitting 2.0). A move with no video shows "Video coming".
+let mpGroup = localStorage.getItem('mpGroup') || 'mid';
+function mpVideo(v) {
+  if (!v) return '<div class="cg-video pending">▶ Video coming</div>';
+  if (/\.(mp4|mov|webm)(\?|$)/i.test(v)) return `<video class="mp-vid" src="${cgEsc(v)}" controls playsinline preload="metadata"></video>`;
+  return `<a class="cg-video" href="${cgEsc(v)}" target="_blank" rel="noopener"><b>▶ WATCH</b>How to do it</a>`;
+}
+function renderMovement() {
+  const M = window.MOVEMENT_PREP, body = document.getElementById('mpBody');
+  if (!M) { body.innerHTML = '<div class="cg-note"><b>COMING SOON</b>Movement Prep is not loaded yet.</div>'; return; }
+  const g = M.groups.find(x => x.id === mpGroup) || M.groups[0];
+  const moves = r => r.phases.reduce((t, p) => t + p.moves.length, 0);
+  body.innerHTML = (M.credit ? `<div class="mp-credit">${cgEsc(M.credit)}</div>` : '')
+    + (M.draft ? '<div class="cg-note"><b>DRAFT LIST</b>Movements and videos are being finalized by a physical therapist.</div>' : '')
+    + `<div class="side-tabs mp-tabs">${M.groups.map(x => `<button class="side-tab ${x.id === g.id ? 'on' : ''}" data-g="${x.id}">${cgEsc(x.short)}</button>`).join('')}</div>`
+    + `<div class="mp-note">${cgEsc(g.note)}</div>`
+    + g.routines.map(r => `<div class="lib-focus">
+      <h3>${r.icon} ${cgEsc(r.name)}</h3>
+      <div class="lib-tags"><span>${r.minutes} MIN</span><span>${moves(r)} MOVES</span></div>
+      <p>${cgEsc(r.when)}</p>
+      ${r.phases.map(p => `<div class="mp-phase">
+        <div class="mp-ph-head">${cgEsc(p.name.toUpperCase())}<small>${cgEsc(p.goal)}</small></div>
+        ${p.moves.map(m => `<details>
+          <summary>${cgEsc(m.name)} <small>${cgEsc(m.dose)}</small></summary>
+          ${m.cue ? `<div class="cg-cue"><small>CUE</small>${cgEsc(m.cue)}</div>` : ''}
+          ${mpVideo(m.video)}
+        </details>`).join('')}
+      </div>`).join('')}
+    </div>`).join('')
+    + '<div style="text-align:center"><button class="cg-back" id="mpBack">◂ BACK TO HOME</button></div>';
+  body.querySelectorAll('.mp-tabs .side-tab').forEach(b => b.addEventListener('click', () => {
+    mpGroup = b.dataset.g; localStorage.setItem('mpGroup', mpGroup); renderMovement();
+  }));
+  document.getElementById('mpBack').onclick = () => showView('view-main');
+}
+document.getElementById('movementBtn').addEventListener('click', () => { renderMovement(); showView('view-movement'); window.scrollTo(0, 0); });
 
 
 

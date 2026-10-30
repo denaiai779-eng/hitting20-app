@@ -5,7 +5,7 @@ Pulls the CSS and the cage-plan / video / review code out of the Makos app, rebr
 and swaps the hard-coded roster for a client list stored in this app's own database.
 Run: python3 build.py   (re-run after editing this file; never hand-edit index.html)
 """
-import re, os, json, time
+import re, os, json, time, shutil
 
 SRC = os.path.expanduser('~/Claude/return-to-quality/index.html')
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'index.html')
@@ -460,6 +460,7 @@ HTML = f"""<!DOCTYPE html>
     <div id="homeNote"></div>
     <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></button>
     <button class="home-btn" id="homeFeedback">💬 COACH FEEDBACK<small>Voice-overs and notes on your videos</small></button>
+    <button class="home-btn" id="movementBtn">🤸 MOVEMENT PREP<small>Warm-ups and arm care by age group</small></button>
     <footer class="h20-foot">HITTING 2.0 · COACH DEVAN AHART</footer>
   </div>
 </div>
@@ -515,6 +516,10 @@ HTML = f"""<!DOCTYPE html>
   <div class="lb-header"><h2>DRILL LIBRARY</h2><div class="sub">Every series and drill a client can be assigned</div></div>
   <div class="cg-wrap" id="libBody"></div>
 </div>
+<div class="view" id="view-movement">
+  <div class="lb-header"><h2>MOVEMENT PREP</h2><div class="sub">Warm up right. Pick your age group.</div></div>
+  <div class="cg-wrap" id="mpBody"></div>
+</div>
 <div class="view" id="view-review">
   <div class="lb-header"><h2>REVIEW</h2><div class="sub" id="rvPlayer">—</div></div>
   <div class="cg-wrap" id="rvBody"></div>
@@ -550,10 +555,13 @@ HTML = f"""<!DOCTYPE html>
 </nav>
 
 <script src="cage-library.js"></script>
+<script src="movement-prep.js?v={VERSION}"></script>
 <script type="module">{app_js}</script>
 </body>
 </html>
 """
 open(OUT, 'w').write(HTML)
+# Movement Prep content is shared: always take the Makos copy so videos added there show up here too
+shutil.copy(os.path.join(os.path.dirname(SRC), 'movement-prep.js'), os.path.join(os.path.dirname(OUT), 'movement-prep.js'))
 json.dump({'v': VERSION}, open(os.path.join(os.path.dirname(OUT), 'version.json'), 'w'))
 print('built', OUT, len(HTML), 'bytes · version', VERSION)
