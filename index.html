@@ -1363,6 +1363,10 @@
   .mp-ph-head small { display:block; font-family:'Inter', Arial, sans-serif; letter-spacing:.3px; font-size:11px; color:var(--muted); text-transform:none; margin-bottom:2px; }
   .mp-phase summary { align-items:center; }
   .mp-phase summary small { display:block; white-space:normal; margin-top:3px; }
+  .cg-goal { border-left-color:var(--cyan); background:rgba(26,169,214,.08); font-size:16px; font-weight:700; color:var(--white); }
+  .cg-goal b { color:var(--cyan); }
+  .cg-goal small { display:block; font-size:11px; font-weight:500; color:var(--muted); margin-top:4px; }
+  .mp-li-vid { color:var(--cyan); font-weight:700; font-size:11px; letter-spacing:1px; text-decoration:none; white-space:nowrap; }
   .mp-vid { width:100%; border-radius:8px; margin:10px 0 4px; background:#000; }
   .side-head { font-family:'Oswald', Impact, sans-serif; letter-spacing:3px; color: var(--cyan); font-size:22px; margin:22px 0 4px; border-bottom:1px solid rgba(26,169,214,.35); padding-bottom:6px; }
   .side-head small { display:block; font-family:'Inter', Arial, sans-serif; font-size:11px; letter-spacing:.5px; color: var(--muted); }
@@ -1610,7 +1614,7 @@
 </nav>
 
 <script src="cage-library.js"></script>
-<script src="movement-prep.js?v=20261029221502"></script>
+<script src="movement-prep.js?v=20261029222120"></script>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
@@ -1619,7 +1623,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Auto-update: phones cache this page, so check for a newer version on open and when the app comes back on screen.
-const APP_VERSION = '20261029221502';
+const APP_VERSION = '20261029222120';
 async function checkForUpdate() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -1801,8 +1805,9 @@ function renderCpOpts() {
   const est = document.getElementById('cpEst');
   if (est) {
     const info = cpSelected.length ? cageRotationInfo(cpSelected) : { maxMinutes: 0, rotation: [] };
-    const m = info.maxMinutes;
-    const rot = info.rotation.length > 1 ? `Rotates: ${info.rotation.map(r => `${r.name} (${r.minutes} min)`).join(' → ')}` : (m ? `Session: about ${m} min` : '');
+    const extra = cpSelected.length ? mpExtraMinutes(cpSide) : 0;
+    const m = info.maxMinutes + extra;
+    const rot = info.rotation.length > 1 ? `Rotates: ${info.rotation.map(r => `${r.name} (${r.minutes + extra} min)`).join(' → ')}` : (m ? `Session: about ${m} min` : '');
     est.textContent = rot + (m > 47 ? ' · over a 45-min booking, drop one' : '');
     est.classList.toggle('over', m > 47);
   }
@@ -1884,15 +1889,16 @@ function renderCageView() {
   const sessionNo = cageStats[currentPlayerId]?.count || 0;
   const session = buildCageSession(focus, sessionNo);
   const steps = [
-    { key: 'warmup', title: session.warmup.name, focus: 'Get ready', minutes: session.warmup.minutes, stepsList: session.warmup.steps, cue: session.warmup.cue },
+    ...mpSessionSteps(session, focus),
     ...session.blocks.map((b, i) => ({ key: 'b' + i, title: b.drill.name, focus: b.step ? `${b.focus.name} · ${b.step}/${b.of}` : b.focus.name, minutes: b.drill.minutes, drill: b.drill, bench: getBenchmark(b.drill) })),
     { key: 'finisher', title: session.finisher.name, focus: 'Compete', minutes: session.finisher.minutes, stepsList: session.finisher.steps, cue: session.finisher.cue, bench: getBenchmark(session.finisher) }
   ];
   cgState = { steps, done: new Set(), timers: {}, bench: {}, session };
-  const note = plan.note ? `<div class="cg-note"><b>FROM COACH</b>${cgEsc(plan.note)}</div>` : '';
+  const note = (plan.note ? `<div class="cg-note"><b>FROM COACH</b>${cgEsc(plan.note)}</div>` : '')
+    + `<div class="cg-note cg-goal"><b>TODAY'S GOAL</b>${cgEsc(focus.map(focusName).join(' + '))}<small>Movement prep, then balance &amp; core, then baseball drills. Every step builds to the goal.</small></div>`;
   body.innerHTML = note + `
     <div class="cg-progress"><div id="cgBar"></div></div>
-    <div class="cg-progress-label" id="cgProgLabel">0 / ${steps.length} done · session #${sessionNo + 1} · about ${session.minutes} min</div>
+    <div class="cg-progress-label" id="cgProgLabel">0 / ${steps.length} done · session #${sessionNo + 1} · about ${steps.reduce((t, x) => t + x.minutes, 0)} min</div>
     ${((f) => f && f.intro ? `<div class="cg-intro"><b>START HERE · ${cgEsc(f.name.toUpperCase())}</b><p>${cgEsc(f.intro.text)}</p><a class="cg-video" href="${cgEsc(f.intro.url)}" target="_blank" rel="noopener"><b>▶ WATCH</b>${cgEsc(f.intro.label)}</a></div>` : '')(session.todaySeries)}
     ${session.seriesCount > 1 ? `<div class="cg-note" style="border-left-color:var(--cyan);background:rgba(0,191,255,.08)"><b style="color:var(--cyan)">TODAY'S SERIES</b>${cgEsc(session.todaySeries.name)}. Your series rotate each session, so next time you'll get ${cgEsc(buildCageSession(focus, sessionNo + 1).todaySeries.name)}.</div>` : ''}
     ${steps.map((st, i) => {
@@ -1903,7 +1909,7 @@ function renderCageView() {
         <div class="cg-title">${cgEsc(st.title)}</div>
         <div class="cg-meta"><span>${st.minutes} min</span>${d ? `<span class="${d.feeder === 'tosser' ? 'tosser' : ''}">${d.feeder === 'tosser' ? 'Needs a tosser' : 'Solo'}</span><span>${cgEsc(d.equip)}</span>` : ''}</div>
         ${d && d.detail ? `<div class="cg-detail"><span>THE DETAIL</span>${cgEsc(d.detail)}</div>` : ''}
-        <ol>${list.map(x => `<li>${cgEsc(x)}</li>`).join('')}</ol>
+        <ol>${st.moves ? st.moves.map(m => `<li>${cgEsc(m.text)}${m.video ? ` <a class="mp-li-vid" href="${cgEsc(m.video)}" target="_blank" rel="noopener">▶ WATCH</a>` : ''}</li>`).join('') : list.map(x => `<li>${cgEsc(x)}</li>`).join('')}</ol>
         ${d ? `<div class="cg-row"><b>Reps:</b> ${cgEsc(d.reps)}</div>` : ''}
         <div class="cg-cue"><small>COACH CUE</small>${cgEsc(d ? d.cue : st.cue)}</div>
         ${d && d.video ? `<a class="cg-video" href="${cgEsc(d.video.url)}" target="_blank" rel="noopener"><b>▶ WATCH HOW</b>${cgEsc(d.video.label)}</a>` : ''}
@@ -2425,6 +2431,29 @@ function mpVideo(v) {
   if (!v) return '<div class="cg-video pending">▶ Video coming</div>';
   if (/\.(mp4|mov|webm)(\?|$)/i.test(v)) return `<video class="mp-vid" src="${cgEsc(v)}" controls playsinline preload="metadata"></video>`;
   return `<a class="cg-video" href="${cgEsc(v)}" target="_blank" rel="noopener"><b>▶ WATCH</b>How to do it</a>`;
+}
+// Cage sessions open with the age group's Movement Prep and Balance & Core, aimed at the session goal
+function mpSessionSteps(session, focus) {
+  const M = window.MOVEMENT_PREP, w = session.warmup;
+  if (!M) return [{ key: 'warmup', title: w.name, focus: 'Get ready', minutes: w.minutes, stepsList: w.steps, cue: w.cue }];
+  const g = M.groups.find(x => x.id === mpGroup) || M.groups[0];
+  const goal = focus.map(focusName).join(' + ');
+  const prep = g.routines.find(r => r.id === (session.side === 'pitching' ? 'throwing' : 'hitting'));
+  const bal = g.routines.find(r => r.id === 'balance');
+  const moveList = r => r.phases.flatMap(p => p.moves.map(m => ({ text: `${m.name} · ${m.dose}`, video: m.video })));
+  return [
+    { key: 'prep', title: `Movement Prep: ${prep.name}`, focus: 'Get ready', minutes: prep.minutes, moves: moveList(prep), cue: `Get the body ready for today's goal: ${goal}.` },
+    { key: 'balance', title: 'Balance & Core', focus: 'Own your base', minutes: bal.minutes, moves: moveList(bal), cue: `Every rep of ${goal} starts from a stable base. Stick every hold.` }
+  ];
+}
+// Minutes Movement Prep + Balance & Core add over the library's built-in warm-up
+function mpExtraMinutes(side) {
+  const M = window.MOVEMENT_PREP;
+  if (!M) return 0;
+  const g = M.groups.find(x => x.id === mpGroup) || M.groups[0];
+  const r = id => (g.routines.find(x => x.id === id) || { minutes: 0 }).minutes;
+  const warm = side === 'pitching' && typeof PITCH_WARMUP !== 'undefined' ? PITCH_WARMUP : CAGE_WARMUP;
+  return r(side === 'pitching' ? 'throwing' : 'hitting') + r('balance') - warm.minutes;
 }
 function renderMovement() {
   const M = window.MOVEMENT_PREP, body = document.getElementById('mpBody');
