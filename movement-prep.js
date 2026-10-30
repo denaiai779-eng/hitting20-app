@@ -7,12 +7,15 @@
 (function () {
   const mv = (name, dose, video = null, cue = '') => ({ name, dose, video, cue });
 
-  // Each routine is broken into the same four phases: Raise -> Mobilize -> Activate -> Prime.
+  // Warm-up routines run Raise -> Mobilize -> Activate -> Prime. Balance & Stability has its own three phases.
   const PHASES = {
     raise:    { name: 'Raise',    goal: 'Get warm. Heart rate up, blood moving.' },
     mobilize: { name: 'Mobilize', goal: 'Open up the hips, spine and shoulders.' },
     activate: { name: 'Activate', goal: 'Wake up the muscles that protect and power the swing / throw.' },
-    prime:    { name: 'Prime',    goal: 'Fast, sport-like reps so the first real one is not the first fast one.' }
+    prime:    { name: 'Prime',    goal: 'Fast, sport-like reps so the first real one is not the first fast one.' },
+    still:    { name: 'Static Balance',  goal: 'Hold still on one leg. Quiet feet, quiet head.' },
+    moving:   { name: 'Dynamic Balance', goal: 'Move, then stop and stick it. Balance you can use in a swing or a delivery.' },
+    core:     { name: 'Core Stability',  goal: 'Hold the trunk steady while the arms and legs move.' }
   };
   const ph = (key, moves) => ({ ...PHASES[key], key, moves });
 
@@ -40,6 +43,22 @@
     ]
   });
 
+  const balance = band => ({
+    id: 'balance', name: 'Balance & Stability', icon: '⚖️', minutes: band === 'youth' ? 8 : 10,
+    when: '2–3 times a week: end of practice or on off days.',
+    phases: [
+      ph('still',  band === 'youth'
+        ? [mv('Flamingo Stand', '10 sec each leg'), mv('Heel-to-Toe Stand', '10 sec each way')]
+        : [mv('Single-Leg Stand, Eyes Closed', band === 'hs' ? '30 sec each leg' : '20 sec each leg'), mv('Single-Leg Stand + Head Turns', '5 turns each leg')]),
+      ph('moving', band === 'youth'
+        ? [mv('Frog Hop + Freeze', '5 each leg'), mv('Leg Lift + Hold (balance point)', '3 sec hold, 5 each leg')]
+        : [mv('Single-Leg Hop + Stick', '5 each leg'), mv('Star Reach (Y-Balance)', '3 each direction'), mv('Leg Lift + Hold (balance point)', '3 sec hold, 5 each leg'), mv('Stride + Hold Finish', '3 sec hold, 5 reps')]),
+      ph('core',   band === 'youth'
+        ? [mv('Bear Hold', '15 sec'), mv('Bird Dog', '5 each side')]
+        : [mv('Front Plank', band === 'hs' ? '40 sec' : '25 sec'), mv('Side Plank', band === 'hs' ? '30 sec each side' : '20 sec each side'), mv('Bird Dog', '6 each side'), mv(band === 'hs' ? 'Band Pallof Press' : 'Light Band Pallof Press', '8 each side')])
+    ]
+  });
+
   const recovery = band => ({
     id: 'recovery', name: 'Day-Off Mobility', icon: '🧘', minutes: band === 'youth' ? 10 : 15,
     when: 'Off days or after a game. Easy pace, no pain.',
@@ -61,7 +80,7 @@
     { id: 'hs', kind: 'hs', name: 'High School – Pro', short: 'HS–PRO',
       note: 'Full routine before every throwing day. Med-ball work replaces dry swings in Prime.' }
   ];
-  GROUPS.forEach(g => { g.routines = [preHitting(g.kind), preThrowing(g.kind), recovery(g.kind)]; });
+  GROUPS.forEach(g => { g.routines = [preHitting(g.kind), preThrowing(g.kind), balance(g.kind), recovery(g.kind)]; });
 
   window.MOVEMENT_PREP = {
     title: 'Movement Prep',
