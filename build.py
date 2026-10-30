@@ -54,6 +54,8 @@ css += """
   .cl-add { display:grid; grid-template-columns: 1fr; gap:8px; margin:8px 0 12px; }
   .cl-add input { width:100%; padding:11px 12px; border-radius:8px; border:1px solid #2f3640; background:#0b0d10; color:var(--white); font-size:15px; font-family:'Inter', Arial, sans-serif; }
   .cp-num.ini { font-family:'Oswald', Impact, sans-serif; background: rgba(26,169,214,.15); color: var(--cyan); border-radius: 50%; width: 34px; height: 34px; display:flex; align-items:center; justify-content:center; font-size:14px; }
+  /* Movement Coach login: review queue only */
+  body.pt-mode #view-coach .coach-section:not(.cs-fb), body.pt-mode .bottom-nav button[data-view="main"] { display:none; }
   footer.h20-foot { text-align:center; color:var(--muted); font-size:10px; letter-spacing:2px; padding:22px 10px 6px; }
 """
 
@@ -95,7 +97,7 @@ R = [
     ("    return sideHead + `<div class=\"lib-focus\">", "    return `<div class=\"lib-focus\">"), ("role: 'family'", "role: 'client'"),
     ("    if (repErr) console.warn('report', repErr);", "    if (repErr) throw repErr;"),
     ("if (!fbState.file) { st.classList.add('err'); st.textContent = 'Pick a video first.'; return; }",
-     "if (!fbState.file) { st.classList.add('err'); st.textContent = 'Pick a video first.'; return; }\n  if (!isCoach) { const vs = await getVideoStatus(currentPlayerId); if (vs && vs.left <= 0) { st.classList.add('err'); st.textContent = LIMIT_MSG; return; } }"),
+     "if (!fbState.file) { st.classList.add('err'); st.textContent = 'Pick a video first.'; return; }\n  if (!isCoach) { const vs = await getVideoStatus(currentPlayerId); if (vs && (fbState.reviewer === 'pt' ? vs.m_left : vs.left) <= 0) { st.classList.add('err'); st.textContent = fbState.reviewer === 'pt' ? MOVE_LIMIT_MSG : LIMIT_MSG; return; } }"),
     ("st.textContent = e && e.message === 'shrink'", "st.textContent = e && /VIDEO_LIMIT/.test(e.message || '') ? LIMIT_MSG : e && e.message === 'shrink'"),
     ("onclick = () => renderVideoForm(targetEl, focus);", "onclick = () => guardVideoForm(targetEl, focus);"),
     ("renderVideoForm(document.getElementById('cgBody'), focus); window.scrollTo(0, 0);", "guardVideoForm(document.getElementById('cgBody'), focus); window.scrollTo(0, 0);"),
@@ -213,24 +215,38 @@ async function getVideoStatus(cid) {
   if (error) { console.warn('video_status', error); return null; }
   return data;
 }
-async function guardVideoForm(targetEl, focus) {
+const MOVE_LIMIT_MSG = "You've used your movement check for this month. It resets on the 1st.";
+async function guardVideoForm(targetEl, focus, reviewer = 'coach') {
+  const pt = reviewer === 'pt';
+  const back = () => { document.getElementById('vgBack').onclick = () => { renderHome(); showView('view-main'); }; };
   if (!isCoach) {
     const vs = await getVideoStatus(currentPlayerId);
-    if (vs && vs.allowed <= 0) { targetEl.innerHTML = `<div class="cg-empty"><b>VIDEO BREAKDOWNS</b>Video breakdowns come with the Hitting 2.0 App add-on or the Remote membership. Ask Coach Devan to add it.<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`; document.getElementById('vgBack').onclick = () => { renderHome(); showView('view-main'); }; return; }
-    if (vs && vs.left <= 0) { targetEl.innerHTML = `<div class="cg-empty"><b>${vs.used} OF ${vs.allowed} USED</b>${LIMIT_MSG}<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`; document.getElementById('vgBack').onclick = () => { renderHome(); showView('view-main'); }; return; }
+    const allowed = vs && (pt ? vs.m_allowed : vs.allowed), left = vs && (pt ? vs.m_left : vs.left), used = vs && (pt ? vs.m_used : vs.used);
+    if (vs && !(allowed > 0)) {
+      targetEl.innerHTML = pt
+        ? `<div class="cg-empty"><b>MOVEMENT CHECKS</b>Movement checks come with App + Coaching: the Movement Coach reviews your prep and balance every month. Ask Coach Devan to add it.<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`
+        : `<div class="cg-empty"><b>VIDEO BREAKDOWNS</b>Video breakdowns come with the Hitting 2.0 App add-on or the Remote membership. Ask Coach Devan to add it.<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`;
+      back(); return;
+    }
+    if (vs && left <= 0) { targetEl.innerHTML = `<div class="cg-empty"><b>${used} OF ${allowed} USED</b>${pt ? MOVE_LIMIT_MSG : LIMIT_MSG}<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`; back(); return; }
   }
-  renderVideoForm(targetEl, focus);
+  renderVideoForm(targetEl, focus, reviewer);
   if (!isCoach) {
     const vs = await getVideoStatus(currentPlayerId);
     const sub = targetEl.querySelector('.fb-sub');
-    if (vs && sub) sub.innerHTML = `<b style="color:var(--cyan)">${vs.left} of ${vs.allowed} videos left this month.</b> Up to 2 minutes each. Coach talks over it.`;
+    if (vs && sub) sub.innerHTML = pt
+      ? `<b style="color:var(--cyan)">${vs.m_left} of ${vs.m_allowed} movement checks left this month.</b> Film your Movement Prep or Balance routine, up to 2 minutes.`
+      : `<b style="color:var(--cyan)">${vs.left} of ${vs.allowed} videos left this month.</b> Up to 2 minutes each. Coach talks over it.`;
   }
 }
 async function renderVideoCounter() {
   const el = document.getElementById('homeVideoSub'); if (!el || !currentPlayerId) return;
-  if (isCoach) { el.textContent = 'Up to 2 minutes. Coach talks over it.'; return; }
+  const mv = document.getElementById('homeMoveSub');
+  if (isCoach) { el.textContent = 'Up to 2 minutes. Coach talks over it.'; mv.textContent = 'Movement Coach reviews prep and balance'; return; }
   const vs = await getVideoStatus(currentPlayerId);
   if (!vs) return;
+  mv.textContent = !(vs.m_allowed > 0) ? 'Comes with App + Coaching'
+    : vs.m_left <= 0 ? `Used this month · resets on the 1st` : `${vs.m_left} of ${vs.m_allowed} left this month · Movement Coach reviews it`;
   el.textContent = vs.allowed <= 0 ? 'Comes with the App add-on or Remote membership'
     : vs.left <= 0 ? `All ${vs.allowed} used this month · resets on the 1st` : `${vs.left} of ${vs.allowed} left this month`;
 }
@@ -242,10 +258,19 @@ document.getElementById('homeVideo').addEventListener('click', () => {
   document.getElementById('cgChips').innerHTML = '';
   guardVideoForm(document.getElementById('cgBody'), cagePlans[currentPlayerId]?.focus || []);
 });
+document.getElementById('homeMove').addEventListener('click', () => {
+  if (!currentPlayerId) return;
+  showView('view-cage'); window.scrollTo(0, 0);
+  const p = clientById(currentPlayerId);
+  document.getElementById('cgPlayer').textContent = p ? p.name : '';
+  document.getElementById('cgChips').innerHTML = '';
+  guardVideoForm(document.getElementById('cgBody'), cagePlans[currentPlayerId]?.focus || [], 'pt');
+});
 document.getElementById('homeFeedback').addEventListener('click', () => { if (currentPlayerId) openMyFeedback(); });
 
 async function openCoachView() {
   showView('view-coach'); window.scrollTo(0, 0);
+  if (isPT) { fbRows = await fetchFeedback(); renderCoachFeedback(); return; }
   await Promise.all([fetchClients(), fetchCagePlans(), fetchCageStats(), refreshAccess(), refreshUsage()]);
   fbRows = await fetchFeedback();
   renderCoachCagePlans(); renderCoachFeedback(); renderAccess();
@@ -261,13 +286,13 @@ __LIFTED__
 
 // --- Coach: clients + who can sign in ---
 const monthKey = () => new Date().toLocaleDateString('en-CA', { timeZone: 'America/Detroit' }).slice(0, 7);
-let usageByClient = {};
+let usageByClient = {}, moveByClient = {};
 async function refreshUsage() {
   const start = monthKey() + '-01T00:00:00-05:00';
-  const { data, error } = await supabase.from('video_usage').select('client_id').gte('created_at', start).limit(5000);
+  const { data, error } = await supabase.from('video_usage').select('client_id, reviewer').gte('created_at', start).limit(5000);
   if (error) { console.warn('usage', error); return; }
-  usageByClient = {};
-  for (const r of data || []) usageByClient[r.client_id] = (usageByClient[r.client_id] || 0) + 1;
+  usageByClient = {}; moveByClient = {};
+  for (const r of data || []) { const m = r.reviewer === 'pt' ? moveByClient : usageByClient; m[r.client_id] = (m[r.client_id] || 0) + 1; }
 }
 async function refreshAccess() {
   const { data, error } = await supabase.from('access').select('*').order('email');
@@ -282,8 +307,8 @@ function slugify(name) {
 function renderAccess() {
   const list = document.getElementById('faList'); if (!list) return;
   const sel = document.getElementById('faPlayer');
-  sel.innerHTML = '<option value="">Add an email for…</option>' + CLIENTS.map(p => `<option value="${p.id}">${cgEsc(p.name)}</option>`).join('') + '<option value="__coach">Coach (sees everything)</option>';
-  const fam = faRows.filter(r => r.role === 'client'), coaches = faRows.filter(r => r.role === 'coach');
+  sel.innerHTML = '<option value="">Add an email for…</option>' + CLIENTS.map(p => `<option value="${p.id}">${cgEsc(p.name)}</option>`).join('') + '<option value="__coach">Coach (sees everything)</option><option value="__pt">Movement Coach (sees movement checks only)</option>';
+  const fam = faRows.filter(r => r.role === 'client'), coaches = faRows.filter(r => r.role === 'coach'), pts = faRows.filter(r => r.role === 'pt');
   const missing = CLIENTS.filter(p => !fam.some(r => r.client_id === p.id)).length;
   document.getElementById('faSummary').textContent = `${CLIENTS.length} client${CLIENTS.length === 1 ? '' : 's'}${missing ? ' · ' + missing + ' with no email' : ''}`;
   const chip = r => `<span class="fa-email">${cgEsc(r.email)}<button data-del="${cgEsc(r.email)}|${r.client_id || ''}" title="Remove">×</button></span>`;
@@ -293,8 +318,11 @@ function renderAccess() {
     return `<div class="fa-player"><div class="fa-name">${cgEsc(p.name)} <button class="fa-arch" data-arch="${p.id}" style="float:right;background:none;border:0;color:var(--muted);font-size:11px;letter-spacing:1px;cursor:pointer">ARCHIVE</button><button data-delc="${p.id}" style="float:right;background:none;border:0;color:#ff6b78;font-size:11px;letter-spacing:1px;cursor:pointer;margin-left:10px">DELETE</button><button data-ren="${p.id}" style="float:right;background:none;border:0;color:var(--cyan);font-size:11px;letter-spacing:1px;cursor:pointer;margin-right:10px">RENAME</button></div>${rows.length ? rows.map(chip).join('') : '<div class="fa-none">NO EMAIL YET: this client cannot sign in</div>'}
       <div class="fa-vid">🎬 Videos this month: <b>${vUsed} of ${vAllowed}</b>
         <button data-vlim="${p.id}" data-to="${p.video_limit > 0 ? 0 : 2}">${p.video_limit > 0 ? 'TURN OFF' : 'TURN ON 2/MO'}</button>
-        <button data-vbonus="${p.id}">+1 EXTRA</button></div></div>`;
-  }).join('') + `<div class="fa-player"><div class="fa-name">Coach</div>${coaches.map(chip).join('')}</div>`;
+        <button data-vbonus="${p.id}">+1 EXTRA</button></div>
+      <div class="fa-vid">🤸 Movement checks: <b>${moveByClient[p.id] || 0} of ${p.movement_limit || 0}</b>
+        <button data-mlim="${p.id}" data-to="${p.movement_limit > 0 ? 0 : 1}">${p.movement_limit > 0 ? 'TURN OFF' : 'TURN ON 1/MO'}</button></div></div>`;
+  }).join('') + `<div class="fa-player"><div class="fa-name">Coach</div>${coaches.map(chip).join('')}</div>`
+    + `<div class="fa-player"><div class="fa-name">Movement Coach</div>${pts.length ? pts.map(chip).join('') : '<div class="fa-none">Not added yet: pick "Movement Coach" above</div>'}</div>`;
   list.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => {
     const [email, pid] = b.dataset.del.split('|');
     if (email === authEmail && !pid) { document.getElementById('faStatus').textContent = 'You cannot remove your own coach access.'; return; }
@@ -308,6 +336,11 @@ function renderAccess() {
   list.querySelectorAll('[data-vlim]').forEach(b => b.addEventListener('click', async () => {
     const { error } = await supabase.from('clients').update({ video_limit: Number(b.dataset.to) }).eq('id', b.dataset.vlim);
     document.getElementById('faStatus').textContent = error ? 'Could not change videos. Try again.' : (Number(b.dataset.to) > 0 ? 'Videos turned on: 2 a month.' : 'Videos turned off.');
+    await refreshUsage(); await fetchClients(); renderAccess();
+  }));
+  list.querySelectorAll('[data-mlim]').forEach(b => b.addEventListener('click', async () => {
+    const { error } = await supabase.from('clients').update({ movement_limit: Number(b.dataset.to) }).eq('id', b.dataset.mlim);
+    document.getElementById('faStatus').textContent = error ? 'Could not change movement checks. Try again.' : (Number(b.dataset.to) > 0 ? 'Movement checks turned on: 1 a month.' : 'Movement checks turned off.');
     await refreshUsage(); await fetchClients(); renderAccess();
   }));
   list.querySelectorAll('[data-vbonus]').forEach(b => b.addEventListener('click', async () => {
@@ -372,7 +405,7 @@ document.getElementById('faAdd').addEventListener('click', async () => {
   const email = document.getElementById('faEmail').value.trim().toLowerCase(), pid = document.getElementById('faPlayer').value, st = document.getElementById('faStatus');
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { st.textContent = 'Enter a valid email.'; return; }
   if (!pid) { st.textContent = 'Pick the client (or Coach).'; return; }
-  const row = pid === '__coach' ? { email, client_id: null, role: 'coach' } : { email, client_id: pid, role: 'client' };
+  const row = pid === '__coach' ? { email, client_id: null, role: 'coach' } : pid === '__pt' ? { email, client_id: null, role: 'pt' } : { email, client_id: pid, role: 'client' };
   const { error } = await supabase.from('access').insert(row);
   st.textContent = error ? (error.code === '23505' ? 'That email already has access for this client.' : 'Could not add. Try again.') : `Added ${email}. They can sign in now.`;
   if (!error) document.getElementById('faEmail').value = '';
@@ -398,7 +431,13 @@ function startRealtime() {
   const allowed = await loadAccess();
   if (!allowed) { await supabase.auth.signOut(); showView('view-login'); renderLogin('email', authEmail, 'That email is not on the Hitting 2.0 list anymore. Ask Coach Devan.'); return; }
   document.body.classList.remove('locked');
-  document.querySelector('.bottom-nav button[data-view="coach"]').style.display = isCoach ? '' : 'none';
+  document.querySelector('.bottom-nav button[data-view="coach"]').style.display = isCoach || isPT ? '' : 'none';
+  if (isPT) {
+    document.body.classList.add('pt-mode');
+    document.querySelector('#view-coach .lb-header h2').textContent = 'MOVEMENT REVIEWS';
+    document.querySelector('.bottom-nav button[data-view="coach"]').textContent = '🤸 Reviews';
+    openCoachView(); startRealtime(); return;
+  }
   await Promise.all([fetchClients(), fetchCagePlans()]);
   if (!isCoach && myPlayerIds.length === 1) { currentPlayerId = myPlayerIds[0]; localStorage.setItem(LOCAL_KEY, currentPlayerId); }
   if (currentPlayerId && !visibleRoster().some(p => p.id === currentPlayerId)) { currentPlayerId = null; localStorage.removeItem(LOCAL_KEY); }
@@ -462,6 +501,7 @@ HTML = f"""<!DOCTYPE html>
     <button class="home-btn primary" id="cagePlanBtn">⚾ MY CAGE PLAN<small id="cagePlanSub">Your session from Coach Devan</small></button>
     <div id="homeNote"></div>
     <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></button>
+    <button class="home-btn" id="homeMove">🤸 SEND A MOVEMENT CHECK<small id="homeMoveSub">Movement Coach reviews your prep and balance</small></button>
     <button class="home-btn" id="homeFeedback">💬 COACH FEEDBACK<small>Voice-overs and notes on your videos</small></button>
     <button class="home-btn" id="movementBtn">🤸 MOVEMENT PREP<small>Warm-ups and arm care by age group</small></button>
     <button class="home-btn" id="balanceBtn">⚖️ BALANCE &amp; STABILITY<small>Own your base: balance and core by age group</small></button>
@@ -477,7 +517,7 @@ HTML = f"""<!DOCTYPE html>
     <button class="lib-btn" id="openLibrary" style="width:100%;margin:6px 0 10px">📚 DRILL LIBRARY</button>
     <div id="coachCagePlans"></div>
   </div>
-  <div class="coach-section">
+  <div class="coach-section cs-fb">
     <div class="coach-section-head"><h3>Videos to Review</h3><div class="cp-last" id="fbSummary"></div></div>
     <div class="cp-hint" style="text-align:left">Tap one to watch and record a voice-over</div>
     <div id="coachFeedback"></div>

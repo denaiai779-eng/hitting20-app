@@ -1,7 +1,7 @@
 // Supabase Edge Function: wix-new-client
 // Called by Wix Automations on hitting2-0.com:
 //   (no ?event)          "Someone books a session"  -> add the customer as a client (+ sign-in) if new
-//   ?event=plan_purchased "Plan ordered"             -> App Add-On / Remote: turn videos on (2 a month)
+//   ?event=plan_purchased "Plan ordered"             -> App Add-On / Remote / App + Coaching: turn videos on (2 a month; App + Coaching also 1 movement check)
 //   ?event=plan_canceled  "Plan canceled"            -> App Add-On / Remote: turn videos off
 // Every call is logged to webhook_log.
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -14,6 +14,11 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const VIDEO_PLANS: Record<string, number> = {
   '8a192d59-00bc-42db-bfd7-5f5ae46005d3': 2, // Hitting 2.0 App Add-On
   'a5486482-5d50-4b8a-b25f-c5dbd3aef18d': 2, // Remote Membership
+  '520d6aa2-6f94-437d-a17d-fb3cecf7a211': 2, // Hitting 2.0 App + Coaching
+};
+// Plans that also include Movement Coach checks, and how many per month
+const MOVEMENT_PLANS: Record<string, number> = {
+  '520d6aa2-6f94-437d-a17d-fb3cecf7a211': 1, // Hitting 2.0 App + Coaching
 };
 
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json' } });
@@ -88,9 +93,11 @@ Deno.serve(async (req) => {
       if (!ids.length && event === 'plan_purchased') ids = [await addClient(email, findName(flat) || email.split('@')[0])];
       if (!ids.length) { result = `skipped: no client for ${email}`; return json({ result }); }
       const limit = event === 'plan_purchased' ? perMonth : 0;
-      const { error } = await sb.from('clients').update({ video_limit: limit, active: true }).in('id', ids);
+      const update: Record<string, unknown> = { video_limit: limit, active: true };
+      if (MOVEMENT_PLANS[planId]) update.movement_limit = event === 'plan_purchased' ? MOVEMENT_PLANS[planId] : 0;
+      const { error } = await sb.from('clients').update(update).in('id', ids);
       if (error) throw error;
-      result = `${event}: videos ${limit ? 'ON (' + limit + '/mo)' : 'OFF'} for ${ids.join(', ')} <${email}>`;
+      result = `${event}: videos ${limit ? 'ON (' + limit + '/mo)' : 'OFF'}${MOVEMENT_PLANS[planId] ? ', movement checks ' + (update.movement_limit ? 'ON' : 'OFF') : ''} for ${ids.join(', ')} <${email}>`;
       return json({ result });
     }
 
