@@ -1366,6 +1366,9 @@
   .cg-goal { border-left-color:var(--cyan); background:rgba(26,169,214,.08); font-size:16px; font-weight:700; color:var(--white); }
   .cg-goal b { color:var(--cyan); }
   .cg-goal small { display:block; font-size:11px; font-weight:500; color:var(--muted); margin-top:4px; }
+  .cg-hw { border-left-color:var(--gold); }
+  .cg-hw-btns { display:flex; gap:8px; margin-top:8px; }
+  .cg-hw-btns .lib-btn { margin:0; flex:1; width:auto; font-size:13px; padding:9px 6px; }
   .mp-li-vid { color:var(--cyan); font-weight:700; font-size:11px; letter-spacing:1px; text-decoration:none; white-space:nowrap; }
   .mp-vid { width:100%; border-radius:8px; margin:10px 0 4px; background:#000; }
   .side-head { font-family:'Oswald', Impact, sans-serif; letter-spacing:3px; color: var(--cyan); font-size:22px; margin:22px 0 4px; border-bottom:1px solid rgba(26,169,214,.35); padding-bottom:6px; }
@@ -1614,7 +1617,7 @@
 </nav>
 
 <script src="cage-library.js"></script>
-<script src="movement-prep.js?v=20261029222120"></script>
+<script src="movement-prep.js?v=20261029222546"></script>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
@@ -1623,7 +1626,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Auto-update: phones cache this page, so check for a newer version on open and when the app comes back on screen.
-const APP_VERSION = '20261029222120';
+const APP_VERSION = '20261029222546';
 async function checkForUpdate() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -1895,7 +1898,8 @@ function renderCageView() {
   ];
   cgState = { steps, done: new Set(), timers: {}, bench: {}, session };
   const note = (plan.note ? `<div class="cg-note"><b>FROM COACH</b>${cgEsc(plan.note)}</div>` : '')
-    + `<div class="cg-note cg-goal"><b>TODAY'S GOAL</b>${cgEsc(focus.map(focusName).join(' + '))}<small>Movement prep, then balance &amp; core, then baseball drills. Every step builds to the goal.</small></div>`;
+    + `<div class="cg-note cg-goal"><b>TODAY'S GOAL</b>${cgEsc(focus.map(focusName).join(' + '))}<small>Movement prep, then balance &amp; core, then baseball drills. Every step builds to the goal.</small></div>`
+    + (window.MOVEMENT_PREP ? `<div class="cg-note cg-hw"><b>BEFORE YOU COME IN</b>Do the full routines at home or before your session. In the cage you'll run the quick versions.<div class="cg-hw-btns"><button class="lib-btn" data-hw="prep">🤸 FULL MOVEMENT PREP</button><button class="lib-btn" data-hw="balance">⚖️ FULL BALANCE</button></div></div>` : '');
   body.innerHTML = note + `
     <div class="cg-progress"><div id="cgBar"></div></div>
     <div class="cg-progress-label" id="cgProgLabel">0 / ${steps.length} done · session #${sessionNo + 1} · about ${steps.reduce((t, x) => t + x.minutes, 0)} min</div>
@@ -1930,6 +1934,7 @@ function renderCageView() {
     <div style="display:flex;gap:8px;margin-top:14px"><button class="lib-btn" id="cgMyFb" style="margin:0;flex:1">💬 COACH FEEDBACK</button><button class="lib-btn" id="cgSendVid" style="margin:0;flex:1">📹 SEND A VIDEO</button></div>
     <div style="text-align:center"><button class="cg-back" id="cgBack">◂ BACK</button></div>`;
   document.getElementById('cgMyFb').onclick = openMyFeedback;
+  body.querySelectorAll('[data-hw]').forEach(b => b.addEventListener('click', () => { stopAllCgTimers(); openMovement(b.dataset.hw, 'view-cage'); }));
   document.getElementById('cgSendVid').onclick = () => { stopAllCgTimers(); guardVideoForm(document.getElementById('cgBody'), focus); window.scrollTo(0, 0); };
   body.querySelectorAll('[data-inc],[data-dec]').forEach(b => b.addEventListener('click', () => {
     const key = b.dataset.inc || b.dataset.dec, st = cgState.steps.find(x => x.key === key);
@@ -2422,7 +2427,7 @@ document.getElementById('openLibrary').addEventListener('click', () => { renderL
 // Content lives in movement-prep.js (shared with Hitting 2.0). A move with no video shows "Video coming".
 // One page, two home buttons: Movement Prep shows the warm-ups, Balance & Stability shows the balance routine.
 let mpGroup = localStorage.getItem('mpGroup') || 'mid';
-let mpMode = 'prep';
+let mpMode = 'prep', mpFrom = 'view-main';
 const MP_MODES = {
   prep:    { title: 'MOVEMENT PREP',       sub: 'Warm up right. Pick your age group.',  pick: r => r.id !== 'balance' },
   balance: { title: 'BALANCE & STABILITY', sub: 'Own your base. Pick your age group.', pick: r => r.id === 'balance' }
@@ -2440,10 +2445,12 @@ function mpSessionSteps(session, focus) {
   const goal = focus.map(focusName).join(' + ');
   const prep = g.routines.find(r => r.id === (session.side === 'pitching' ? 'throwing' : 'hitting'));
   const bal = g.routines.find(r => r.id === 'balance');
-  const moveList = r => r.phases.flatMap(p => p.moves.map(m => ({ text: `${m.name} · ${m.dose}`, video: m.video })));
+  // In the cage: the short version (quick moves). The full routine is homework before the session.
+  const moveList = r => r.phases.flatMap(p => p.moves.filter(m => !r.quick || r.quick.includes(m.name)).map(m => ({ text: `${m.name} · ${m.dose}`, video: m.video })));
+  const mins = r => r.quickMinutes || r.minutes;
   return [
-    { key: 'prep', title: `Movement Prep: ${prep.name}`, focus: 'Get ready', minutes: prep.minutes, moves: moveList(prep), cue: `Get the body ready for today's goal: ${goal}.` },
-    { key: 'balance', title: 'Balance & Core', focus: 'Own your base', minutes: bal.minutes, moves: moveList(bal), cue: `Every rep of ${goal} starts from a stable base. Stick every hold.` }
+    { key: 'prep', title: `Movement Prep: ${prep.name}`, focus: 'Quick version', minutes: mins(prep), moves: moveList(prep), cue: `Get the body ready for today's goal: ${goal}.` },
+    { key: 'balance', title: 'Balance & Core', focus: 'Quick version', minutes: mins(bal), moves: moveList(bal), cue: `Every rep of ${goal} starts from a stable base. Stick every hold.` }
   ];
 }
 // Minutes Movement Prep + Balance & Core add over the library's built-in warm-up
@@ -2451,7 +2458,7 @@ function mpExtraMinutes(side) {
   const M = window.MOVEMENT_PREP;
   if (!M) return 0;
   const g = M.groups.find(x => x.id === mpGroup) || M.groups[0];
-  const r = id => (g.routines.find(x => x.id === id) || { minutes: 0 }).minutes;
+  const r = id => { const x = g.routines.find(y => y.id === id); return x ? (x.quickMinutes || x.minutes) : 0; };
   const warm = side === 'pitching' && typeof PITCH_WARMUP !== 'undefined' ? PITCH_WARMUP : CAGE_WARMUP;
   return r(side === 'pitching' ? 'throwing' : 'hitting') + r('balance') - warm.minutes;
 }
@@ -2484,9 +2491,10 @@ function renderMovement() {
   body.querySelectorAll('.mp-tabs .side-tab').forEach(b => b.addEventListener('click', () => {
     mpGroup = b.dataset.g; localStorage.setItem('mpGroup', mpGroup); renderMovement();
   }));
-  document.getElementById('mpBack').onclick = () => showView('view-main');
+  document.getElementById('mpBack').textContent = mpFrom === 'view-cage' ? '◂ BACK TO MY SESSION' : '◂ BACK TO HOME';
+  document.getElementById('mpBack').onclick = () => { showView(mpFrom); window.scrollTo(0, 0); };
 }
-const openMovement = mode => { mpMode = mode; renderMovement(); showView('view-movement'); window.scrollTo(0, 0); };
+const openMovement = (mode, from = 'view-main') => { mpMode = mode; mpFrom = from; renderMovement(); showView('view-movement'); window.scrollTo(0, 0); };
 document.getElementById('movementBtn').addEventListener('click', () => openMovement('prep'));
 document.getElementById('balanceBtn').addEventListener('click', () => openMovement('balance'));
 

@@ -3,6 +3,8 @@
 // To add a video: set `video` on a move to a YouTube/Vimeo link or an .mp4 URL, e.g.
 //   mv('Glute Bridge', '10 reps', 'https://youtu.be/xxxx')
 // Leave it null and the app shows "Video coming".
+// quick = the moves a cage session uses (short in-session version, quickMinutes long).
+// The full routine is homework before the session.
 
 (function () {
   const mv = (name, dose, video = null, cue = '') => ({ name, dose, video, cue });
@@ -20,7 +22,8 @@
   const ph = (key, moves) => ({ ...PHASES[key], key, moves });
 
   const preHitting = band => ({
-    id: 'hitting', name: 'Pre-Hitting', icon: '⚾', minutes: 8,
+    id: 'hitting', name: 'Pre-Hitting', icon: '⚾', minutes: 8, quickMinutes: 5,
+    quick: ['Jog + Skip', "World's Greatest Stretch", 'Glute Bridge', 'Slow-to-Fast Dry Swings', 'Med-Ball Rotational Throw'],
     when: 'Before cage work, BP, or a game.',
     phases: [
       ph('raise',    [mv('Jog + Skip', '1 lap'), mv('Lateral Shuffle', '2 down & back')]),
@@ -31,7 +34,8 @@
   });
 
   const preThrowing = band => ({
-    id: 'throwing', name: 'Pre-Throwing · Arm Care', icon: '🎯', minutes: 10,
+    id: 'throwing', name: 'Pre-Throwing · Arm Care', icon: '🎯', minutes: 10, quickMinutes: 5,
+    quick: ['Arm Circles (small to big)', 'Prone Y-T-W (no weight)', 'Band Pull-Aparts', 'Band External Rotation', 'Wrist Flips'],
     when: 'Before any catch, practice, or game. Every time.',
     phases: [
       ph('raise',    [mv('Jog', '1 lap'), mv('Carioca', '2 down & back')]),
@@ -44,7 +48,8 @@
   });
 
   const balance = band => ({
-    id: 'balance', name: 'Balance & Stability', icon: '⚖️', minutes: band === 'youth' ? 8 : 10,
+    id: 'balance', name: 'Balance & Stability', icon: '⚖️', minutes: band === 'youth' ? 8 : 10, quickMinutes: 5,
+    quick: ['Flamingo Stand', 'Single-Leg Stand, Eyes Closed', 'Frog Hop + Freeze', 'Single-Leg Hop + Stick', 'Leg Lift + Hold (balance point)', 'Bear Hold', 'Front Plank'],
     when: '2–3 times a week: end of practice or on off days.',
     phases: [
       ph('still',  band === 'youth'
