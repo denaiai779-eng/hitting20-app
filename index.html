@@ -1634,7 +1634,7 @@
 </nav>
 
 <script src="cage-library.js"></script>
-<script src="movement-prep.js?v=20261029234601"></script>
+<script src="movement-prep.js?v=20261029234900"></script>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
@@ -1643,7 +1643,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Auto-update: phones cache this page, so check for a newer version on open and when the app comes back on screen.
-const APP_VERSION = '20261029234601';
+const APP_VERSION = '20261029234900';
 async function checkForUpdate() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -2522,7 +2522,7 @@ function renderMovement() {
   document.getElementById('mpTitle').textContent = mode.title;
   document.getElementById('mpSub').textContent = mode.sub;
   body.innerHTML = (M.credit ? `<div class="mp-credit">${cgEsc(M.credit)}</div>` : '')
-    + (M.draft ? '<div class="cg-note"><b>DRAFT LIST</b>Movements and videos are being finalized by Dr. Nia Ahart, our physical therapist.</div>' : '')
+    + (M.draft ? '<div class="cg-note"><b>DRAFT LIST</b>Movements and videos are being finalized by Dr. Nia Ahart, PT, DPT.</div>' : '')
     + `<div class="side-tabs mp-tabs">${M.groups.map(x => `<button class="side-tab ${x.id === g.id ? 'on' : ''}" data-g="${x.id}">${cgEsc(x.short)}</button>`).join('')}</div>`
     + `<div class="mp-note">${cgEsc(g.note)}</div>`
     + g.routines.filter(mode.pick).map(r => `<div class="lib-focus">
