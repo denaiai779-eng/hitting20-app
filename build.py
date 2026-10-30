@@ -224,7 +224,7 @@ async function guardVideoForm(targetEl, focus, reviewer = 'coach') {
     const allowed = vs && (pt ? vs.m_allowed : vs.allowed), left = vs && (pt ? vs.m_left : vs.left), used = vs && (pt ? vs.m_used : vs.used);
     if (vs && !(allowed > 0)) {
       targetEl.innerHTML = pt
-        ? `<div class="cg-empty"><b>MOVEMENT CHECKS</b>Movement checks come with App + Coaching: the Movement Coach reviews your prep and balance every month. Ask Coach Devan to add it.<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`
+        ? `<div class="cg-empty"><b>MOVEMENT CHECKS</b>Movement checks come with App + Coaching: Coach Nia, our physical therapist, reviews your prep and balance every month. Ask Coach Devan to add it.<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`
         : `<div class="cg-empty"><b>VIDEO BREAKDOWNS</b>Video breakdowns come with the Hitting 2.0 App add-on or the Remote membership. Ask Coach Devan to add it.<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`;
       back(); return;
     }
@@ -242,11 +242,11 @@ async function guardVideoForm(targetEl, focus, reviewer = 'coach') {
 async function renderVideoCounter() {
   const el = document.getElementById('homeVideoSub'); if (!el || !currentPlayerId) return;
   const mv = document.getElementById('homeMoveSub');
-  if (isCoach) { el.textContent = 'Up to 2 minutes. Coach talks over it.'; mv.textContent = 'Movement Coach reviews prep and balance'; return; }
+  if (isCoach) { el.textContent = 'Up to 2 minutes. Coach talks over it.'; mv.textContent = 'Coach Nia reviews prep and balance'; return; }
   const vs = await getVideoStatus(currentPlayerId);
   if (!vs) return;
   mv.textContent = !(vs.m_allowed > 0) ? 'Comes with App + Coaching'
-    : vs.m_left <= 0 ? `Used this month · resets on the 1st` : `${vs.m_left} of ${vs.m_allowed} left this month · Movement Coach reviews it`;
+    : vs.m_left <= 0 ? `Used this month · resets on the 1st` : `${vs.m_left} of ${vs.m_allowed} left this month · Coach Nia reviews it`;
   el.textContent = vs.allowed <= 0 ? 'Comes with the App add-on or Remote membership'
     : vs.left <= 0 ? `All ${vs.allowed} used this month · resets on the 1st` : `${vs.left} of ${vs.allowed} left this month`;
 }
@@ -501,7 +501,7 @@ HTML = f"""<!DOCTYPE html>
     <button class="home-btn primary" id="cagePlanBtn">⚾ MY CAGE PLAN<small id="cagePlanSub">Your session from Coach Devan</small></button>
     <div id="homeNote"></div>
     <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></button>
-    <button class="home-btn" id="homeMove">🤸 SEND A MOVEMENT CHECK<small id="homeMoveSub">Movement Coach reviews your prep and balance</small></button>
+    <button class="home-btn" id="homeMove">🤸 SEND A MOVEMENT CHECK<small id="homeMoveSub">Coach Nia reviews your prep and balance</small></button>
     <button class="home-btn" id="homeFeedback">💬 COACH FEEDBACK<small>Voice-overs and notes on your videos</small></button>
     <button class="home-btn" id="movementBtn">🤸 MOVEMENT PREP<small>Warm-ups and arm care by age group</small></button>
     <button class="home-btn" id="balanceBtn">⚖️ BALANCE &amp; STABILITY<small>Own your base: balance and core by age group</small></button>
