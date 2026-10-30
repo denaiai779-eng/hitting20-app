@@ -1536,7 +1536,7 @@
     <button class="home-btn primary" id="cagePlanBtn">⚾ MY CAGE PLAN<small id="cagePlanSub">Your session from Coach Devan</small></button>
     <div id="homeNote"></div>
     <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></button>
-    <button class="home-btn" id="homeMove">🤸 SEND A MOVEMENT CHECK<small id="homeMoveSub">Coach Nia reviews your prep and balance</small></button>
+    <button class="home-btn" id="homeMove">🤸 SEND A MOVEMENT CHECK<small id="homeMoveSub">Dr. Nia reviews your prep and balance</small></button>
     <button class="home-btn" id="homeFeedback">💬 COACH FEEDBACK<small>Voice-overs and notes on your videos</small></button>
     <button class="home-btn" id="movementBtn">🤸 MOVEMENT PREP<small>Warm-ups and arm care by age group</small></button>
     <button class="home-btn" id="balanceBtn">⚖️ BALANCE &amp; STABILITY<small>Own your base: balance and core by age group</small></button>
@@ -1634,7 +1634,7 @@
 </nav>
 
 <script src="cage-library.js"></script>
-<script src="movement-prep.js?v=20261029234042"></script>
+<script src="movement-prep.js?v=20261029234601"></script>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
@@ -1643,7 +1643,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Auto-update: phones cache this page, so check for a newer version on open and when the app comes back on screen.
-const APP_VERSION = '20261029234042';
+const APP_VERSION = '20261029234601';
 async function checkForUpdate() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });
@@ -1722,7 +1722,7 @@ async function guardVideoForm(targetEl, focus, reviewer = 'coach') {
     const allowed = vs && (pt ? vs.m_allowed : vs.allowed), left = vs && (pt ? vs.m_left : vs.left), used = vs && (pt ? vs.m_used : vs.used);
     if (vs && !(allowed > 0)) {
       targetEl.innerHTML = pt
-        ? `<div class="cg-empty"><b>MOVEMENT CHECKS</b>Movement checks come with App + Coaching: Coach Nia, our physical therapist, reviews your prep and balance every month. Ask Coach Devan to add it.<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`
+        ? `<div class="cg-empty"><b>MOVEMENT CHECKS</b>Movement checks come with App + Coaching: Dr. Nia, our physical therapist, reviews your prep and balance every month. Ask Coach Devan to add it.<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`
         : `<div class="cg-empty"><b>VIDEO BREAKDOWNS</b>Video breakdowns come with the Hitting 2.0 App add-on or the Remote membership. Ask Coach Devan to add it.<br><button class="cg-back" id="vgBack">◂ BACK</button></div>`;
       back(); return;
     }
@@ -1740,11 +1740,11 @@ async function guardVideoForm(targetEl, focus, reviewer = 'coach') {
 async function renderVideoCounter() {
   const el = document.getElementById('homeVideoSub'); if (!el || !currentPlayerId) return;
   const mv = document.getElementById('homeMoveSub');
-  if (isCoach) { el.textContent = 'Up to 2 minutes. Coach talks over it.'; mv.textContent = 'Coach Nia reviews prep and balance'; return; }
+  if (isCoach) { el.textContent = 'Up to 2 minutes. Coach talks over it.'; mv.textContent = 'Dr. Nia reviews prep and balance'; return; }
   const vs = await getVideoStatus(currentPlayerId);
   if (!vs) return;
   mv.textContent = !(vs.m_allowed > 0) ? 'Comes with App + Coaching'
-    : vs.m_left <= 0 ? `Used this month · resets on the 1st` : `${vs.m_left} of ${vs.m_allowed} left this month · Coach Nia reviews it`;
+    : vs.m_left <= 0 ? `Used this month · resets on the 1st` : `${vs.m_left} of ${vs.m_allowed} left this month · Dr. Nia reviews it`;
   el.textContent = vs.allowed <= 0 ? 'Comes with the App add-on or Remote membership'
     : vs.left <= 0 ? `All ${vs.allowed} used this month · resets on the 1st` : `${vs.left} of ${vs.allowed} left this month`;
 }
@@ -2075,7 +2075,7 @@ let fbState = null; // player form state
 let rvState = null; // coach review state
 // Hitting 2.0 also has a Movement Coach (physical therapist) login. Each video is for one reviewer.
 let isPT = false;
-const REVIEWER_LABEL = { coach: 'Coach', pt: 'Coach Nia' };
+const REVIEWER_LABEL = { coach: 'Coach', pt: 'Dr. Nia' };
 const rvOf = r => r.reviewer || 'coach';
 
 async function fetchFeedback(playerId) {
@@ -2147,13 +2147,13 @@ function renderVideoForm(targetEl, focus, reviewer = 'coach') {
   const pt = reviewer === 'pt';
   targetEl.innerHTML = `<div class="fb-card">
       <h3>${pt ? 'SEND A MOVEMENT CHECK' : 'SEND COACH A VIDEO'}</h3>
-      <div class="fb-sub">${pt ? 'Film your Movement Prep or Balance routine (up to 2 minutes). Coach Nia, our physical therapist, reviews how you move and talks over it.' : 'Players or parents can send a clip (up to 2 minutes) for Coach to review and talk over.'}</div>
+      <div class="fb-sub">${pt ? 'Film your Movement Prep or Balance routine (up to 2 minutes). Dr. Nia, our physical therapist, reviews how you move and talks over it.' : 'Players or parents can send a clip (up to 2 minutes) for Coach to review and talk over.'}</div>
       <div class="fb-label">VIDEO</div>
       <label class="fb-file" id="fbFileLabel">📹 Pick or record a video<small>Up to 2 minutes. Big videos get shrunk automatically.</small><input type="file" id="fbFile" accept="video/*"></label>
       <div class="fb-label">${pt ? 'ANYTHING TO KNOW? (OPTIONAL)' : 'WHAT SHOULD COACH LOOK AT? (OPTIONAL)'}</div>
       <textarea class="cp-note-in" id="fbNote" maxlength="400" placeholder="${pt ? 'Example: Single-leg balance, my left side feels wobbly' : 'Example: Inside Lane dry reps, does my barrel stay behind?'}"></textarea>
       <div class="fb-status" id="fbStatus"></div>
-      <button class="fb-send" id="fbSend">${pt ? 'SEND TO COACH NIA' : 'SEND TO COACH'}</button>
+      <button class="fb-send" id="fbSend">${pt ? 'SEND TO DR. NIA' : 'SEND TO COACH'}</button>
       <button class="fb-skip" id="fbSkip">Cancel</button>
     </div>`;
   document.getElementById('fbFile').addEventListener('change', async e => {
@@ -2243,7 +2243,7 @@ async function submitVideo(targetEl) {
     document.getElementById('cgBack3').onclick = () => showView('view-main');
   } catch (e) {
     console.warn(e);
-    btn.disabled = false; btn.textContent = fbState.reviewer === 'pt' ? 'SEND TO COACH NIA' : 'SEND TO COACH';
+    btn.disabled = false; btn.textContent = fbState.reviewer === 'pt' ? 'SEND TO DR. NIA' : 'SEND TO COACH';
     st.classList.add('err');
     st.textContent = e && /VIDEO_LIMIT/.test(e.message || '') ? LIMIT_MSG : e && e.message === 'shrink' ? 'This phone could not shrink the video. Trim it shorter or film in 720p, then try again.'
       : e && e.message === 'toobig' ? 'Still too big after shrinking. Trim it shorter and try again.'
@@ -2522,7 +2522,7 @@ function renderMovement() {
   document.getElementById('mpTitle').textContent = mode.title;
   document.getElementById('mpSub').textContent = mode.sub;
   body.innerHTML = (M.credit ? `<div class="mp-credit">${cgEsc(M.credit)}</div>` : '')
-    + (M.draft ? '<div class="cg-note"><b>DRAFT LIST</b>Movements and videos are being finalized by Nia Ahart, our physical therapist.</div>' : '')
+    + (M.draft ? '<div class="cg-note"><b>DRAFT LIST</b>Movements and videos are being finalized by Dr. Nia Ahart, our physical therapist.</div>' : '')
     + `<div class="side-tabs mp-tabs">${M.groups.map(x => `<button class="side-tab ${x.id === g.id ? 'on' : ''}" data-g="${x.id}">${cgEsc(x.short)}</button>`).join('')}</div>`
     + `<div class="mp-note">${cgEsc(g.note)}</div>`
     + g.routines.filter(mode.pick).map(r => `<div class="lib-focus">
