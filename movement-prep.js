@@ -50,15 +50,18 @@
     ]
   });
 
+  // kind picks the routine variant: 'youth' = no bands / no med-ball, 'mid' = light bands, 'hs' = full routine
   const GROUPS = [
-    { id: 'youth', name: 'Ages 7–10', short: '7–10',
+    { id: 'pups', kind: 'youth', name: 'Ages 5–7', short: '5–7',
+      note: 'Make every move a game ("be a bear," "jump like a frog"). One cue at a time, about where the body goes, not muscles. A few minutes is plenty. No weights.' },
+    { id: 'youth', kind: 'youth', name: 'Ages 8–10', short: '8–10',
       note: 'Keep it a game. One cue at a time, about where the body goes ("push the floor away"), not muscles. Short and often beats long and rare. No weights.' },
-    { id: 'mid', name: 'Ages 11–13', short: '11–13',
+    { id: 'mid', kind: 'mid', name: 'Ages 11–13', short: '11–13',
       note: 'Growth-spurt years. Mobility matters most here. Light bands only; quality over speed.' },
-    { id: 'hs', name: 'High School', short: 'HS',
+    { id: 'hs', kind: 'hs', name: 'High School – Pro', short: 'HS–PRO',
       note: 'Full routine before every throwing day. Med-ball work replaces dry swings in Prime.' }
   ];
-  GROUPS.forEach(g => { g.routines = [preHitting(g.id), preThrowing(g.id), recovery(g.id)]; });
+  GROUPS.forEach(g => { g.routines = [preHitting(g.kind), preThrowing(g.kind), recovery(g.kind)]; });
 
   window.MOVEMENT_PREP = {
     title: 'Movement Prep',
