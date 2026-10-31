@@ -1486,6 +1486,305 @@
   .div-logo { width:28px; height:28px; object-fit:contain; vertical-align:middle; margin-left:6px; }
   .ps-card .div-logo { width:40px; height:40px; margin:0 0 0 6px; }
 
+  /* ===== V2 SKIN: glass surfaces, quieter type, real icons. Overrides the rules above. ===== */
+  :root {
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-2: rgba(255, 255, 255, 0.07);
+    --hair: rgba(255, 255, 255, 0.08);
+    --hair-2: rgba(255, 255, 255, 0.14);
+    --r-lg: 22px;
+    --r-md: 16px;
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  body {
+    font-family: 'Inter', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #050b16;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.005em;
+  }
+  body::before {
+    background:
+      radial-gradient(120% 60% at 85% -10%, rgba(26,169,214,0.22) 0%, transparent 55%),
+      radial-gradient(90% 50% at -10% 30%, rgba(26,169,214,0.10) 0%, transparent 60%),
+      linear-gradient(180deg, #0b0d10 0%, #050b16 70%);
+  }
+  body::after { display: none; }
+  .view.active { animation: viewIn 0.32s var(--ease); }
+  @keyframes viewIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  button { -webkit-font-smoothing: antialiased; }
+  button:active { transform: scale(0.97); }
+  button { transition: transform 0.15s var(--ease), background 0.2s, border-color 0.2s, color 0.2s; }
+  .ic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+
+  /* Status pill */
+  .sync-status { top: calc(env(safe-area-inset-top) + 10px); right: 12px; padding: 5px 9px 5px 18px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--hair); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    font-size: 9px; letter-spacing: 1px; }
+  .sync-status::before { content: ''; position: absolute; left: 8px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: currentColor; }
+  .sync-status.online::before { box-shadow: 0 0 8px var(--green); }
+
+  /* Headers */
+  header.app-header { border-bottom: 0; padding: 22px 16px 6px; }
+  #view-main header.app-header { display: flex; align-items: center; gap: 12px; text-align: left; max-width: 600px; margin: 0 auto; padding: 18px 16px 4px; }
+  #view-main .logo-wrap { margin: 0; }
+  #view-main .logo { width: 46px; filter: drop-shadow(0 4px 14px rgba(26,169,214,0.35)); }
+  #view-main header.app-header h1 { font-size: 26px; letter-spacing: 1px; }
+  .hd-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+  #view-main .player-chip { margin: 0 70px 0 auto; }
+  .player-chip { background: var(--surface-2); border: 1px solid var(--hair-2); color: var(--ink); font-size: 11px; letter-spacing: 0.5px; padding: 7px 12px; }
+  .player-chip .num { color: var(--cyan); }
+  .lb-header { padding: 26px 18px 12px; text-align: left; max-width: 600px; margin: 0 auto; }
+  .lb-header h2 { font-size: 34px; letter-spacing: 1px; line-height: 1; }
+  .lb-header .sub { font-size: 12px; letter-spacing: 0; text-transform: none; font-weight: 600; margin-top: 4px; }
+  .lb-header .cg-chips { justify-content: flex-start; }
+
+  /* Score cards with progress to the next reward */
+  .scorebar { gap: 10px; margin-top: 14px; padding: 0 16px; }
+  .score-card { text-align: left; background: var(--surface); border: 1px solid var(--hair); border-radius: var(--r-lg); padding: 14px 16px 14px;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .score-card::before { display: none; }
+  .score-card .label { font-family: 'Inter', 'Inter', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.4px; text-transform: none; color: var(--muted); margin-bottom: 4px; }
+  .score-card .val { font-size: 44px; letter-spacing: 0.5px; }
+  .score-card .pts { font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+  .sc-bar { height: 4px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); margin-top: 10px; overflow: hidden; }
+  .sc-bar i { display: block; height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, var(--cyan-deep), var(--cyan)); transition: width 0.8s var(--ease); }
+  .score-card.total .sc-bar i { background: linear-gradient(90deg, #d9a400, var(--gold)); }
+  .sc-next { font-size: 10.5px; font-weight: 600; color: var(--muted); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Home actions: hero card + tiles */
+  .cage-plan-btn { display: flex; align-items: center; gap: 14px; text-align: left; width: calc(100% - 32px); max-width: 568px; margin: 12px auto 0;
+    padding: 18px 18px; border-radius: var(--r-lg); font-size: 24px; letter-spacing: 0.8px; line-height: 1.05; box-shadow: none; }
+  .cage-plan-btn.hero { background:
+      radial-gradient(120% 140% at 100% 0%, rgba(255, 255, 255, 0.28) 0%, transparent 45%),
+      linear-gradient(135deg, var(--cyan) 0%, var(--cyan-deep) 100%);
+    box-shadow: 0 14px 34px -12px rgba(26,169,214,0.6); }
+  .cage-plan-btn small { font-family: 'Inter', 'Inter', sans-serif; font-size: 12px; letter-spacing: 0; font-weight: 600; opacity: 0.8; margin-top: 4px; }
+  .ab-ic { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+    background: rgba(11,13,16,0.18); }
+  .ab-tx { flex: 1; min-width: 0; }
+  .ab-go { font-family: 'Inter', sans-serif; font-size: 22px; opacity: 0.7; }
+  .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 568px; width: calc(100% - 32px); margin: 10px auto 0; }
+  .quick-grid .cage-plan-btn { width: 100%; margin: 0; }
+  .quick-grid .mp-btn { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; font-size: 19px;
+    background: var(--surface) !important; border: 1px solid var(--hair) !important; color: var(--white) !important;
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .quick-grid .mp-btn small { color: var(--muted); opacity: 1; font-size: 11.5px; line-height: 1.35; }
+  .quick-grid .mp-btn .ab-ic { width: 38px; height: 38px; border-radius: 12px; background: rgba(26,169,214,0.12); color: var(--cyan); }
+  .quick-grid .mp-btn.wide { grid-column: 1 / -1; flex-direction: row; align-items: center; }
+  .quick-grid .mp-btn.wide .ab-ic { background: rgba(255, 216, 74, 0.12); color: var(--gold); }
+  .quick-grid .mp-btn .ab-go { color: var(--muted); }
+
+  /* Situation picker */
+  .tabs-label { font-family: 'Inter', 'Inter', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--white); padding-left: 2px; margin: 10px 0 10px; }
+  .tabs { gap: 6px; padding-bottom: 6px; }
+  .tab { clip-path: none; border-radius: 999px; padding: 9px 15px; background: var(--surface); border: 1px solid var(--hair);
+    color: #b7c4da; font-family: 'Inter', 'Inter', sans-serif; font-size: 12.5px; font-weight: 700; letter-spacing: 0; text-transform: none; }
+  .tab.active { background: var(--white); color: var(--navy-1); border-color: var(--white); box-shadow: 0 6px 18px -6px rgba(26,169,214,0.6); }
+  .tab.divider { display: none; }
+  .tab-group-label { font-family: 'Inter', 'Inter', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; color: var(--muted); opacity: 1; padding: 0 2px 0 10px; }
+  .tab-group-label:first-child { padding-left: 2px; }
+
+  /* Spin / deal / take away */
+  .wheel-wrap { width: min(64vw, 290px); margin-top: 4px; }
+  .spin-btn, .takeaway-btn { max-width: none; border-radius: 999px; padding: 17px 20px; font-size: 21px; letter-spacing: 1.5px; }
+  .spin-btn { background: linear-gradient(135deg, var(--cyan), var(--cyan-deep)); box-shadow: 0 14px 30px -12px rgba(26,169,214,0.7); }
+  .deal-btn { box-shadow: 0 14px 30px -14px rgba(255, 216, 74, 0.6); }
+  .takeaway-btn { background: transparent; border: 1px solid rgba(255, 71, 87, 0.35); font-size: 17px; padding: 13px 20px; }
+
+  /* Cards */
+  .result, details, .seq-card, .lb-row, .reward-card, .reward-summary, .coach-stat, .coach-section, .ps-card, .lg-card, .cg-block, .cg-intro, .cg-empty, .lib-focus, .fb-card, .mp-phase {
+    border-radius: var(--r-md);
+  }
+  .result { background: var(--surface); border: 1px solid var(--hair); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .result.empty { font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 600; min-height: 84px; }
+  .result.bronze, .result.silver, .result.gold, .result.diamond { border-width: 1px; }
+  .result .tier-pill, .result .reward { border-radius: 999px; }
+  details { background: var(--surface); border: 1px solid var(--hair); margin-top: 14px; }
+  details summary { font-family: 'Inter', 'Inter', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0; text-transform: none; color: var(--white);
+    padding: 15px 16px; display: flex; justify-content: space-between; align-items: center; }
+  details summary::after, details[open] summary::after { content: ''; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted);
+    transform: rotate(45deg); margin: -4px 4px 0 0; transition: transform 0.2s var(--ease); }
+  details[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
+  .ladder-section h3, .rewards-section h3 { font-family: 'Inter', 'Inter', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); border: 0; padding-left: 0; }
+  .ladder-row { background: rgba(255, 255, 255, 0.025); border: 1px solid var(--hair); border-radius: 14px; }
+  .ladder-bar, .rc-bar { height: 5px; border-radius: 5px; }
+  .ladder-fill, .rc-fill { border-radius: 5px; }
+  footer { border-top: 1px solid var(--hair); letter-spacing: 1px; font-weight: 600; text-transform: none; font-size: 11px; }
+
+  /* Leaderboard, rewards, coach */
+  .lb-toggle, .coach-toggle { background: var(--surface); border: 1px solid var(--hair); border-radius: 999px; padding: 4px; gap: 4px; }
+  .lb-toggle button, .coach-toggle button { border: 0 !important; border-radius: 999px; background: transparent; font-family: 'Inter', 'Inter', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0; text-transform: none; }
+  .lb-toggle button.active, .coach-toggle button.active { background: var(--white); color: var(--navy-1); }
+  .lb-row { background: var(--surface); border: 1px solid var(--hair); }
+  .lb-row.me { background: rgba(26,169,214,0.08); border-color: rgba(26,169,214,0.4); }
+  .lb-num { border-radius: 8px; }
+  .reward-summary { background: var(--surface); border: 1px solid var(--hair); }
+  .reward-card { background: var(--surface); border: 1px solid var(--hair) !important; border-left: 3px solid currentColor !important; }
+  .reward-card.tier-bronze { color: var(--bronze); } .reward-card.tier-silver { color: var(--silver); }
+  .reward-card.tier-gold { color: var(--gold); } .reward-card.tier-diamond { color: var(--diamond); }
+  .reward-card .rc-reward { color: var(--ink); }
+  .coach-stat { background: var(--surface); border: 1px solid var(--hair); }
+  .coach-stat::before { display: none; }
+  .coach-section { background: var(--surface); border: 1px solid var(--hair); width: calc(100% - 28px); max-width: 572px; margin: 14px auto; padding: 16px 14px; }
+  .coach-section h3, .coach-section-head h3 { font-family: 'Inter', 'Inter', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 0; text-transform: none; color: var(--white); }
+  .coach-player, .coach-feed-row, .cp-plan-row, .fb-list-item { border-color: var(--hair) !important; }
+  .lib-btn { border-radius: 999px; border: 1px solid var(--hair-2); background: var(--surface-2); color: var(--white);
+    font-family: 'Inter', 'Inter', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.4px; padding: 13px; }
+
+  /* Player select + sign in */
+  .ps-card { background: var(--surface); border: 1px solid var(--hair); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .ps-card:hover { border-color: rgba(26,169,214,0.5); }
+  .lg-card { background: var(--surface); border: 1px solid var(--hair); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+
+  /* Cage plan, movement, video pages */
+  .cg-block, .cg-intro, .lib-focus, .fb-card, .mp-phase { background: var(--surface) !important; border: 1px solid var(--hair) !important; }
+  .cg-chip, .side-tab, .cg-meta span { border-radius: 999px; }
+  .side-tabs { background: var(--surface); border: 1px solid var(--hair); border-radius: 999px; padding: 4px; }
+  .side-tab { border: 0 !important; }
+  .side-tab.on { background: var(--white) !important; color: var(--navy-1) !important; }
+  .cg-btn, .fb-send, .cg-finish, .cg-back, .cp-sheet-actions button { border-radius: 999px; }
+
+  /* Bottom sheets */
+  .sheet-content { background: rgba(11,13,16,0.86) !important; border: 1px solid var(--hair) !important; border-radius: 26px 26px 0 0 !important;
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+
+  /* Tab bar */
+  .bottom-nav { background: linear-gradient(180deg, transparent, rgba(5, 11, 22, 0.9) 45%); backdrop-filter: none; bottom: 0; }
+  .bottom-nav-inner { background: rgba(16, 28, 48, 0.72); border: 1px solid var(--hair-2); padding: 6px; gap: 2px;
+    backdrop-filter: blur(22px) saturate(160%); -webkit-backdrop-filter: blur(22px) saturate(160%); box-shadow: 0 18px 40px -10px rgba(0, 0, 0, 0.7); }
+  .bottom-nav button { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 16px 6px; min-width: 70px;
+    font-family: 'Inter', 'Inter', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.2px; color: #8796b0; }
+  .bottom-nav button .ic { width: 21px; height: 21px; }
+  .bottom-nav button.active { background: rgba(26,169,214,0.14); color: var(--cyan); }
+
+  .spin-btn.deal-btn { background: linear-gradient(135deg, var(--gold), #d4a017); color: var(--navy-1); }
+  .coach-stat .cs-label, .rs-label, .rc-status, .ladder-pts, .rc-pts, .cf-time, .cp-last, .coach-player .cp-pts small {
+    font-family: 'Inter', 'Inter', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; text-transform: none; }
+  .coach-stat { text-align: left; padding: 14px 16px; }
+  .coach-stat .cs-label { color: var(--muted); }
+  .coach-stat .cs-val { font-size: 38px; }
+  .rs-label { color: var(--muted); }
+  .cp-hint { letter-spacing: 0 !important; text-transform: none !important; }
+
+  /* ===== V3 DEPTH: light from above, real thickness, tilt + glare (fx.js) ===== */
+  :root {
+    --lift: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -1px 0 rgba(0, 0, 0, 0.45),
+      0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 22px -8px rgba(0, 0, 0, 0.7), 0 26px 44px -22px rgba(0, 0, 0, 0.75);
+    --lit: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.035) 38%, rgba(255, 255, 255, 0.015) 100%);
+  }
+
+  /* Floor grid that runs off into the distance */
+  body::after { display: block; content: ''; position: fixed; left: -60%; right: -60%; bottom: 0; height: 95vh; top: auto; z-index: 0;
+    background:
+      repeating-linear-gradient(90deg, rgba(26,169,214,0.42) 0 2px, transparent 2px 56px),
+      repeating-linear-gradient(0deg, rgba(26,169,214,0.42) 0 2px, transparent 2px 56px);
+    transform: perspective(520px) rotateX(52deg); transform-origin: 50% 100%;
+    -webkit-mask-image: linear-gradient(0deg, rgba(0, 0, 0, 0.75), transparent 75%); mask-image: linear-gradient(0deg, rgba(0, 0, 0, 0.75), transparent 75%);
+    box-shadow: none; pointer-events: none; }
+
+  /* Raised surfaces */
+  .score-card, .result, details, .lb-row, .reward-card, .reward-summary, .coach-stat, .coach-section, .ps-card, .lg-card,
+  .cg-block, .cg-intro, .lib-focus, .fb-card, .quick-grid .mp-btn, .ladder-row {
+    background: var(--lit), rgba(13, 30, 56, 0.55) !important;
+    box-shadow: var(--lift);
+    border-color: rgba(255, 255, 255, 0.07) !important;
+  }
+  .ladder-row { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10), 0 6px 14px -8px rgba(0, 0, 0, 0.7); }
+  .reward-card { border-left: 3px solid currentColor !important; }
+
+  /* Tilt targets */
+  .tilt, .cage-plan-btn, .score-card, .spin-btn, .ps-card {
+    --rx: 0deg; --ry: 0deg; --press: 0px; --mx: 50%; --my: 0%;
+    position: relative; transform-style: preserve-3d;
+    transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(var(--press));
+    transition: transform 0.45s var(--ease), box-shadow 0.25s var(--ease);
+  }
+  .is-tilting { transition: transform 0.08s linear, box-shadow 0.15s; }
+  .cage-plan-btn::before, .score-card::before, .spin-btn::before, .ps-card::before, .tilt::before {
+    content: ''; display: block; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 2; height: auto;
+    background: radial-gradient(circle at var(--mx) var(--my), rgba(255, 255, 255, 0.22), transparent 55%);
+    opacity: 0; transition: opacity 0.3s; }
+  .is-tilting::before { opacity: 1; }
+  button.cage-plan-btn:active, .spin-btn:active, .ps-card:active { --press: 3px; }
+
+  /* Buttons with thickness: the colored slab sits on a darker edge */
+  .cage-plan-btn.hero { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), inset 0 -2px 0 rgba(0, 40, 90, 0.35),
+    0 6px 0 #005a9e, 0 8px 2px rgba(0, 0, 0, 0.35), 0 22px 36px -10px rgba(26,169,214,0.55); margin-bottom: 6px; }
+  .cage-plan-btn.hero:active { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 3px 0 #005a9e, 0 10px 20px -8px rgba(26,169,214,0.5); }
+  .spin-btn { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), inset 0 -2px 0 rgba(0, 40, 90, 0.3),
+    0 6px 0 #005a9e, 0 8px 2px rgba(0, 0, 0, 0.35), 0 20px 34px -12px rgba(26,169,214,0.65); margin-bottom: 12px; }
+  .spin-btn.deal-btn { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 0 rgba(120, 80, 0, 0.3),
+    0 6px 0 #a87a00, 0 8px 2px rgba(0, 0, 0, 0.35), 0 20px 34px -12px rgba(255, 216, 74, 0.55); }
+  .spin-btn:active { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 3px 0 #005a9e, 0 8px 16px -8px rgba(26,169,214,0.5); }
+  .spin-btn.deal-btn:active { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 3px 0 #a87a00, 0 8px 16px -8px rgba(255, 216, 74, 0.5); }
+  .takeaway-btn { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 4px 0 rgba(120, 20, 30, 0.55), 0 12px 20px -10px rgba(0, 0, 0, 0.7); }
+  .cage-plan-btn, .spin-btn { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35); }
+  .quick-grid .mp-btn { text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5); }
+
+  /* Icon chips: little domes */
+  .ab-ic { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), inset 0 -3px 6px rgba(0, 0, 0, 0.25), 0 6px 12px -4px rgba(0, 0, 0, 0.5);
+    transform: translateZ(24px); }
+  .cage-plan-btn.hero .ab-ic { background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.08)); color: #062040; }
+  .quick-grid .mp-btn .ab-ic { background: linear-gradient(180deg, rgba(26,169,214,0.32), rgba(26,169,214,0.08)); }
+  .quick-grid .mp-btn.wide .ab-ic { background: linear-gradient(180deg, rgba(255, 216, 74, 0.32), rgba(255, 216, 74, 0.08)); }
+  .ab-tx { transform: translateZ(14px); }
+
+  /* Extruded numbers */
+  .score-card .val, .coach-stat .cs-val { text-shadow: 0 1px 0 #b9c7dd, 0 2px 0 #8fa3c2, 0 3px 0 #6b80a3, 0 4px 0 #4d6185, 0 8px 14px rgba(0, 0, 0, 0.6);
+    display: inline-block; transform: translateZ(20px); }
+  .score-card.total .val, .coach-stat .cs-val { text-shadow: 0 1px 0 #e8c23a, 0 2px 0 #c9a020, 0 3px 0 #a68210, 0 4px 0 #7d6108, 0 8px 14px rgba(0, 0, 0, 0.6); }
+  .lb-header h2, header.app-header h1 { text-shadow: 0 2px 0 rgba(0, 0, 0, 0.35), 0 6px 18px rgba(0, 0, 0, 0.5); }
+
+  /* Progress bars sit in a groove */
+  .sc-bar, .ladder-bar, .rc-bar { background: rgba(0, 0, 0, 0.35); box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.06); }
+  .sc-bar i, .ladder-fill, .rc-fill { box-shadow: 0 0 10px rgba(26,169,214,0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4); }
+
+  /* Situation pills + toggles: active one pops out, the rest are pressed in */
+  .tab, .lb-toggle, .coach-toggle, .side-tabs { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.05); }
+  .tab.active, .lb-toggle button.active, .coach-toggle button.active, .side-tab.on {
+    background: linear-gradient(180deg, #ffffff, #d6e2f2) !important;
+    box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.12), 0 3px 0 #8ea3c2, 0 10px 18px -8px rgba(26,169,214,0.7); }
+
+  /* Tab bar: floating glass slab */
+  .bottom-nav-inner { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+    0 4px 0 rgba(0, 0, 0, 0.35), 0 22px 40px -10px rgba(0, 0, 0, 0.85); }
+  .bottom-nav button.active { background: linear-gradient(180deg, rgba(26,169,214,0.28), rgba(26,169,214,0.08));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 18px -2px rgba(26,169,214,0.55); }
+  .bottom-nav button.active .ic { filter: drop-shadow(0 0 6px rgba(26,169,214,0.9)); }
+
+  /* Makos HQ emblem on a lit stage */
+  .hq-stage { position: relative; width: min(78vw, 330px); margin: 4px auto 0; perspective: 800px; }
+  .hq-stage::after { content: ''; position: absolute; left: 12%; right: 12%; bottom: -4px; height: 22px; border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(26,169,214,0.55), rgba(26,169,214,0.12) 60%, transparent);
+    filter: blur(4px); animation: hqShadow 5s ease-in-out infinite; z-index: -1; }
+  .hq-emblem { display: block; width: 100%; height: auto; transform-origin: 50% 60%;
+    filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 14px 18px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 26px rgba(26,169,214,0.35));
+    animation: hqFloat 5s ease-in-out infinite; }
+  .hq-stage.tilt { transform: perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)); }
+  .hq-stage.tilt::before { border-radius: 40%; }
+  @keyframes hqFloat { 0%, 100% { transform: translateY(0) rotateX(6deg) rotateY(-6deg); } 50% { transform: translateY(-7px) rotateX(-3deg) rotateY(6deg); } }
+  @keyframes hqShadow { 0%, 100% { transform: scaleX(1); opacity: 0.9; } 50% { transform: scaleX(0.82); opacity: 0.55; } }
+  #view-main header.app-header.hq-head { display: block; text-align: center; padding: 14px 16px 2px; }
+  .hq-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .hq-row h1 { font-size: 22px !important; letter-spacing: 1.5px !important; }
+  #view-main .hq-row .player-chip { margin: 0; }
+  .hq-stage.sm { width: min(64vw, 260px); }
+
+  /* Makos HQ emblem as the spinner: wide stage, turns on its vertical axis like a flipped coin */
+  .wheel-wrap { width: min(88vw, 380px); aspect-ratio: 3 / 2; margin-top: 10px; perspective: 900px; }
+  .wheel-wrap::after { content: ''; position: absolute; left: 14%; right: 14%; bottom: 2%; height: 24px; border-radius: 50%; z-index: 1;
+    background: radial-gradient(closest-side, rgba(26,169,214,0.55), rgba(26,169,214,0.12) 60%, transparent); filter: blur(4px);
+    animation: hqShadow 5s ease-in-out infinite; }
+  .makos-logo { width: 100%; max-width: 380px;
+    filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6)) drop-shadow(0 14px 18px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 26px rgba(26,169,214,0.35));
+    animation: hqFloat 5s ease-in-out infinite; }
+  .makos-logo.spinning { animation: spinHQ 3.5s cubic-bezier(0.17, 0.67, 0.21, 1) forwards; }
+  @keyframes spinHQ {
+    0%   { transform: rotateY(0deg) scale(1); }
+    15%  { transform: rotateY(220deg) scale(1.1) translateY(-10px); }
+    100% { transform: rotateY(2160deg) scale(1); }
+  }
+
   /* Hitting 2.0 */
   .h20-logo { width: 260px; max-width: 80%; height: auto; display: block; margin: 0 auto 2px; }
   .h20-sub { font-family: 'Oswald', Impact, sans-serif; letter-spacing: 3px; font-size: 15px; color: var(--cyan); margin-top: 6px; text-transform: uppercase; }
@@ -1506,6 +1805,10 @@
   .cp-num.ini { font-family:'Oswald', Impact, sans-serif; background: rgba(26,169,214,.15); color: var(--cyan); border-radius: 50%; width: 34px; height: 34px; display:flex; align-items:center; justify-content:center; font-size:14px; }
   /* Movement Coach login: review queue only */
   body.pt-mode #view-coach .coach-section:not(.cs-fb), body.pt-mode .bottom-nav button[data-view="main"] { display:none; }
+  .home-wrap .cage-plan-btn.hero, .home-wrap .quick-grid { width: 100%; }
+  .quick-grid .mp-btn.wide .ab-ic { background: rgba(26,169,214,.12); color: var(--cyan); }
+  #view-main header.app-header { justify-content: space-between; }
+  #view-main .h20-logo { width: 150px; margin: 0; }
   footer.h20-foot { text-align:center; color:var(--muted); font-size:10px; letter-spacing:2px; padding:22px 10px 6px; }
 </style>
 </head>
@@ -1533,13 +1836,15 @@
     <div class="player-chip" id="playerChip"><span id="playerName">Pick a client</span><span style="opacity:.6;">⇄</span></div>
   </header>
   <div class="home-wrap">
-    <button class="home-btn primary" id="cagePlanBtn">⚾ MY CAGE PLAN<small id="cagePlanSub">Your session from Coach Devan</small></button>
+    <button class="cage-plan-btn hero" id="cagePlanBtn"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M6.6 5.7c1.7 1.8 2.6 4 2.6 6.3s-.9 4.5-2.6 6.3M17.4 5.7c-1.7 1.8-2.6 4-2.6 6.3s.9 4.5 2.6 6.3"/></svg></span><span class="ab-tx">MY CAGE PLAN<small id="cagePlanSub">Your session from Coach Devan</small></span><span class="ab-go">›</span></button>
     <div id="homeNote"></div>
-    <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></button>
-    <button class="home-btn" id="homeMove">🤸 SEND A MOVEMENT CHECK<small id="homeMoveSub">Dr. Nia reviews your prep and balance</small></button>
-    <button class="home-btn" id="homeFeedback">💬 COACH FEEDBACK<small>Voice-overs and notes on your videos</small></button>
-    <button class="home-btn" id="movementBtn">🤸 MOVEMENT PREP<small>Warm-ups and arm care by age group</small></button>
-    <button class="home-btn" id="balanceBtn">⚖️ BALANCE &amp; STABILITY<small>Own your base: balance and core by age group</small></button>
+    <div class="quick-grid">
+      <button class="cage-plan-btn mp-btn wide" id="homeVideo"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="12" height="12" rx="3"/><path d="M15 10.5l6-3.5v10l-6-3.5z"/></svg></span><span class="ab-tx">SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></span><span class="ab-go">›</span></button>
+      <button class="cage-plan-btn mp-btn wide" id="homeMove"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="2"/><path d="M5 9l7 1.5L19 9M12 10.5V15l-3.5 6M12 15l3.5 6"/></svg></span><span class="ab-tx">SEND A MOVEMENT CHECK<small id="homeMoveSub">Dr. Nia reviews your prep and balance</small></span><span class="ab-go">›</span></button>
+      <button class="cage-plan-btn mp-btn wide" id="homeFeedback"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></span><span class="ab-tx">COACH FEEDBACK<small>Voice-overs and notes on your videos</small></span><span class="ab-go">›</span></button>
+      <button class="cage-plan-btn mp-btn" id="movementBtn"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span><span class="ab-tx">MOVEMENT PREP<small>Warm-ups and arm care by age group</small></span></button>
+      <button class="cage-plan-btn mp-btn" id="balanceBtn"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></span><span class="ab-tx">BALANCE &amp; STABILITY<small>Balance and core by age group</small></span></button>
+    </div>
     <footer class="h20-foot">HITTING 2.0 · COACH DEVAN AHART</footer>
   </div>
 </div>
@@ -1549,7 +1854,7 @@
   <div class="coach-section">
     <div class="coach-section-head"><h3>Clients &amp; Plans</h3><div class="cp-last" id="cpSummary"></div></div>
     <div class="cp-hint" style="text-align:left">Tap a client after a lesson to set what he works on this week</div>
-    <button class="lib-btn" id="openLibrary" style="width:100%;margin:6px 0 10px">📚 DRILL LIBRARY</button>
+    <button class="lib-btn" id="openLibrary" style="width:100%;margin:6px 0 10px">DRILL LIBRARY</button>
     <div id="coachCagePlans"></div>
   </div>
   <div class="coach-section cs-fb">
@@ -1628,13 +1933,14 @@
 
 <nav class="bottom-nav">
   <div class="bottom-nav-inner">
-    <button data-view="main" class="active">⚾ Home</button>
-    <button data-view="coach">👔 Coach</button>
+    <button data-view="main" class="active"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z"/></svg>Home</button>
+    <button data-view="coach"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/></svg>Coach</button>
   </div>
 </nav>
 
 <script src="cage-library.js"></script>
-<script src="movement-prep.js?v=20261029234900"></script>
+<script src="fx.js?v=20261031003936"></script>
+<script src="movement-prep.js?v=20261031003936"></script>
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 
@@ -1643,7 +1949,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // Auto-update: phones cache this page, so check for a newer version on open and when the app comes back on screen.
-const APP_VERSION = '20261029234900';
+const APP_VERSION = '20261031003936';
 async function checkForUpdate() {
   try {
     const r = await fetch('version.json?t=' + Date.now(), { cache: 'no-store' });

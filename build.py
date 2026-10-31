@@ -56,6 +56,10 @@ css += """
   .cp-num.ini { font-family:'Oswald', Impact, sans-serif; background: rgba(26,169,214,.15); color: var(--cyan); border-radius: 50%; width: 34px; height: 34px; display:flex; align-items:center; justify-content:center; font-size:14px; }
   /* Movement Coach login: review queue only */
   body.pt-mode #view-coach .coach-section:not(.cs-fb), body.pt-mode .bottom-nav button[data-view="main"] { display:none; }
+  .home-wrap .cage-plan-btn.hero, .home-wrap .quick-grid { width: 100%; }
+  .quick-grid .mp-btn.wide .ab-ic { background: rgba(26,169,214,.12); color: var(--cyan); }
+  #view-main header.app-header { justify-content: space-between; }
+  #view-main .h20-logo { width: 150px; margin: 0; }
   footer.h20-foot { text-align:center; color:var(--muted); font-size:10px; letter-spacing:2px; padding:22px 10px 6px; }
 """
 
@@ -498,13 +502,15 @@ HTML = f"""<!DOCTYPE html>
     <div class="player-chip" id="playerChip"><span id="playerName">Pick a client</span><span style="opacity:.6;">⇄</span></div>
   </header>
   <div class="home-wrap">
-    <button class="home-btn primary" id="cagePlanBtn">⚾ MY CAGE PLAN<small id="cagePlanSub">Your session from Coach Devan</small></button>
+    <button class="cage-plan-btn hero" id="cagePlanBtn"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M6.6 5.7c1.7 1.8 2.6 4 2.6 6.3s-.9 4.5-2.6 6.3M17.4 5.7c-1.7 1.8-2.6 4-2.6 6.3s.9 4.5 2.6 6.3"/></svg></span><span class="ab-tx">MY CAGE PLAN<small id="cagePlanSub">Your session from Coach Devan</small></span><span class="ab-go">›</span></button>
     <div id="homeNote"></div>
-    <button class="home-btn" id="homeVideo">📹 SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></button>
-    <button class="home-btn" id="homeMove">🤸 SEND A MOVEMENT CHECK<small id="homeMoveSub">Dr. Nia reviews your prep and balance</small></button>
-    <button class="home-btn" id="homeFeedback">💬 COACH FEEDBACK<small>Voice-overs and notes on your videos</small></button>
-    <button class="home-btn" id="movementBtn">🤸 MOVEMENT PREP<small>Warm-ups and arm care by age group</small></button>
-    <button class="home-btn" id="balanceBtn">⚖️ BALANCE &amp; STABILITY<small>Own your base: balance and core by age group</small></button>
+    <div class="quick-grid">
+      <button class="cage-plan-btn mp-btn wide" id="homeVideo"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="12" height="12" rx="3"/><path d="M15 10.5l6-3.5v10l-6-3.5z"/></svg></span><span class="ab-tx">SEND COACH A VIDEO<small id="homeVideoSub">Up to 2 minutes. Coach talks over it.</small></span><span class="ab-go">›</span></button>
+      <button class="cage-plan-btn mp-btn wide" id="homeMove"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="2"/><path d="M5 9l7 1.5L19 9M12 10.5V15l-3.5 6M12 15l3.5 6"/></svg></span><span class="ab-tx">SEND A MOVEMENT CHECK<small id="homeMoveSub">Dr. Nia reviews your prep and balance</small></span><span class="ab-go">›</span></button>
+      <button class="cage-plan-btn mp-btn wide" id="homeFeedback"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/><path d="M8 9h8M8 13h5"/></svg></span><span class="ab-tx">COACH FEEDBACK<small>Voice-overs and notes on your videos</small></span><span class="ab-go">›</span></button>
+      <button class="cage-plan-btn mp-btn" id="movementBtn"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span><span class="ab-tx">MOVEMENT PREP<small>Warm-ups and arm care by age group</small></span></button>
+      <button class="cage-plan-btn mp-btn" id="balanceBtn"><span class="ab-ic"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2"/></svg></span><span class="ab-tx">BALANCE &amp; STABILITY<small>Balance and core by age group</small></span></button>
+    </div>
     <footer class="h20-foot">HITTING 2.0 · COACH DEVAN AHART</footer>
   </div>
 </div>
@@ -514,7 +520,7 @@ HTML = f"""<!DOCTYPE html>
   <div class="coach-section">
     <div class="coach-section-head"><h3>Clients &amp; Plans</h3><div class="cp-last" id="cpSummary"></div></div>
     <div class="cp-hint" style="text-align:left">Tap a client after a lesson to set what he works on this week</div>
-    <button class="lib-btn" id="openLibrary" style="width:100%;margin:6px 0 10px">📚 DRILL LIBRARY</button>
+    <button class="lib-btn" id="openLibrary" style="width:100%;margin:6px 0 10px">DRILL LIBRARY</button>
     <div id="coachCagePlans"></div>
   </div>
   <div class="coach-section cs-fb">
@@ -593,12 +599,13 @@ HTML = f"""<!DOCTYPE html>
 
 <nav class="bottom-nav">
   <div class="bottom-nav-inner">
-    <button data-view="main" class="active">⚾ Home</button>
-    <button data-view="coach">👔 Coach</button>
+    <button data-view="main" class="active"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v8.5a1.5 1.5 0 0 1-1.5 1.5H15v-6H9v6H5.5A1.5 1.5 0 0 1 4 19.5z"/></svg>Home</button>
+    <button data-view="coach"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4V3h6v1M9 11h6M9 15h4"/></svg>Coach</button>
   </div>
 </nav>
 
 <script src="cage-library.js"></script>
+<script src="fx.js?v={VERSION}"></script>
 <script src="movement-prep.js?v={VERSION}"></script>
 <script type="module">{app_js}</script>
 </body>
@@ -607,5 +614,6 @@ HTML = f"""<!DOCTYPE html>
 open(OUT, 'w').write(HTML)
 # Movement Prep content is shared: always take the Makos copy so videos added there show up here too
 shutil.copy(os.path.join(os.path.dirname(SRC), 'movement-prep.js'), os.path.join(os.path.dirname(OUT), 'movement-prep.js'))
+shutil.copy(os.path.join(os.path.dirname(SRC), 'fx.js'), os.path.join(os.path.dirname(OUT), 'fx.js'))  # 3D tilt, shared
 json.dump({'v': VERSION}, open(os.path.join(os.path.dirname(OUT), 'version.json'), 'w'))
 print('built', OUT, len(HTML), 'bytes · version', VERSION)
