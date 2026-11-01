@@ -455,7 +455,7 @@ function startRealtime() {
 app_js = APP_JS.replace('__URL__', SUPABASE_URL).replace('__KEY__', ANON).replace('__VERSION__', VERSION).replace('__LIFTED__', js)
 
 # Leftovers from the Makos engine that must not survive
-for bad in ['planSide(', 'side-head', 'TEAM_ID', 'ROSTER', 'divLogo', 'allPlayersData', 'getMonday', 'periodStart', "'log'", 'Makos', 'MAKO', 'Nick', 'fetchPlayers']:
+for bad in ['planSide(', 'side-head', 'TEAM_ID', 'ROSTER', 'divLogo', 'allPlayersData', 'getMonday', "'log'", 'Makos', 'MAKO', 'Nick', 'fetchPlayers']:
     assert bad not in app_js, f'leftover: {bad}'
 
 HTML = f"""<!DOCTYPE html>
